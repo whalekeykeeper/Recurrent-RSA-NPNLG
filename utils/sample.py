@@ -41,13 +41,14 @@ def load_image(url, transform=None):
     hashed_url = re.sub('/', '', url)
 
     response = requests.get(url, stream=True)
-    with open('data/google_images/img' + hashed_url + '.jpg', 'wb') as out_file:
+    with open('./data/google_images/img' + hashed_url + '.jpg', 'wb') as out_file:
         shutil.copyfileobj(response.raw, out_file)
     # del response
+    print("___________")
     print(url, response)
     # print(os.listdir())
 
-    image = Image.open('data/google_images/img' + hashed_url + '.jpg')
+    image = Image.open('./data/google_images/img' + hashed_url + '.jpg')
     # print("image loaded (sample.py)")
     image = image.resize([224, 224], Image.Resampling.LANCZOS)
     # width = image.size[0]

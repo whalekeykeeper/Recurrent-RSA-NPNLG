@@ -1,7 +1,6 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 
-bayesian_agents/
 data/.DS_Store
 .DS_Store
 .idea/
