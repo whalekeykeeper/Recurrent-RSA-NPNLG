@@ -92,8 +92,8 @@ class Model:
 
 		else:
 			from utils.sample import to_var,load_image,load_image_from_path
-			self.features = [self.encoder(to_var(load_image(url, self.transform), volatile=True)) for url in images]
-			self.default_image = self.encoder(to_var(load_image_from_path("data/default.jpg", self.transform), volatile=True))
+			self.features = [self.encoder(to_var(load_image(url, self.transform))) for url in images]
+			self.default_image = self.encoder(to_var(load_image_from_path("data/default.jpg", self.transform)))
 
 
 			# self.speakers = [Model(path) for path in paths]

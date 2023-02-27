@@ -4,6 +4,7 @@ import torchvision.models as models
 from torch.nn.utils.rnn import pack_padded_sequence
 from torch.autograd import Variable
 
+from torchvision.models import resnet152, ResNet152_Weights
 from utils.build_vocab import Vocabulary
 import pickle
 
@@ -11,7 +12,7 @@ class EncoderCNN(nn.Module):
     def __init__(self, embed_size):
         """Load the pretrained ResNet-152 and replace top fc layer."""
         super(EncoderCNN, self).__init__()
-        resnet = models.resnet152(pretrained=True)
+        resnet = models.resnet152(weights=ResNet152_Weights.IMAGENET1K_V1) #weights=ResNet152_Weights.DEFAULT
         modules = list(resnet.children())[:-1]      # delete the last fc layer.
         self.resnet = nn.Sequential(*modules)
         self.linear = nn.Linear(resnet.fc.in_features, embed_size)

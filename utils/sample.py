@@ -12,10 +12,11 @@ from PIL import Image
 import re
 
 
-def to_var(x, volatile=False):
-    if torch.cuda.is_available():
-        x = x.cuda()
-    return Variable(x, volatile=volatile)
+def to_var(x):
+    with torch.no_grad():
+        if torch.cuda.is_available():
+            x = x.cuda()
+    return x
 
 
 def load_image_from_path(path, transform=None):
@@ -37,18 +38,18 @@ def load_image(url, transform=None):
     from PIL import Image as PIL_Image
     import shutil
     import requests
-
     hashed_url = re.sub('/', '', url)
-
     response = requests.get(url, stream=True)
-    with open('./data/google_images/img' + hashed_url + '.jpg', 'wb') as out_file:
+    with open('data/google_images/img' + hashed_url + '.jpg', 'wb') as out_file:
         shutil.copyfileobj(response.raw, out_file)
     # del response
-    print("___________")
-    print(url, response)
+
+    if "200" not in str(response):
+        print("Check if you are forbbiden to visit the urls.")
+        
     # print(os.listdir())
 
-    image = Image.open('./data/google_images/img' + hashed_url + '.jpg')
+    image = Image.open('data/google_images/img' + hashed_url + '.jpg')
     # print("image loaded (sample.py)")
     image = image.resize([224, 224], Image.Resampling.LANCZOS)
     # width = image.size[0]
