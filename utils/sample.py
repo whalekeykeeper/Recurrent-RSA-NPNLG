@@ -1,15 +1,16 @@
-import torch
+import argparse
+import os
+import pickle
+import re
+
 import matplotlib.pyplot as plt
 import numpy as np
-import argparse
-import pickle
-import os
-
+import torch
+from PIL import Image
 from torch.autograd import Variable
 from torchvision import transforms
+
 from utils.build_vocab import Vocabulary
-from PIL import Image
-import re
 
 
 def to_var(x):
@@ -24,7 +25,7 @@ def load_image_from_path(path, transform=None):
 
     # Qin
     with Image.open(path) as image:
-    # image = Image.open(path)
+        # image = Image.open(path)
         image = image.resize((224, 224), Image.Resampling.LANCZOS)
         # image = image.crop([0,0,224,224])
         if transform is not None:
@@ -34,13 +35,15 @@ def load_image_from_path(path, transform=None):
 
 
 def load_image(url, transform=None):
-    import urllib.request
-    from PIL import Image as PIL_Image
     import shutil
+    import urllib.request
+
     import requests
-    hashed_url = re.sub('/', '', url)
+    from PIL import Image as PIL_Image
+
+    hashed_url = re.sub("/", "", url)
     response = requests.get(url, stream=True)
-    with open('data/google_images/img' + hashed_url + '.jpg', 'wb') as out_file:
+    with open("data/google_images/img" + hashed_url + ".jpg", "wb") as out_file:
         shutil.copyfileobj(response.raw, out_file)
     # del response
 
@@ -49,7 +52,7 @@ def load_image(url, transform=None):
 
     # print(os.listdir())
 
-    image = Image.open('data/google_images/img' + hashed_url + '.jpg')
+    image = Image.open("data/google_images/img" + hashed_url + ".jpg")
     # print("image loaded (sample.py)")
     image = image.resize([224, 224], Image.Resampling.LANCZOS)
     # width = image.size[0]
