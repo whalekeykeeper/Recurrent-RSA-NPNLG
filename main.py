@@ -16,12 +16,16 @@ from utils.config import *
 from utils.numpy_functions import uniform_vector, make_initial_prior
 from recursion_schemes.recursion_schemes import ana_greedy, ana_beam
 from bayesian_agents.joint_rsa import RSA
+#
+# urls = [
+#     "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Arriva_T6_nearside.JPG/1200px-Arriva_T6_nearside.JPG",
+#     "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/First_Student_IC_school_bus_202076.jpg/220px-First_Student_IC_school_bus_202076.jpg"
+# ]
 
-urls = [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Arriva_T6_nearside.JPG/1200px-Arriva_T6_nearside.JPG",
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/First_Student_IC_school_bus_202076.jpg/220px-First_Student_IC_school_bus_202076.jpg"
-]
-
+# Qin: If an URL is visited too much, wikipedia might ban the visit. A "PIL.UnidentifiedImageError" will occur. In
+# this case, just try to get some new URLs.
+urls = ["https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Polar_Bear_AdF.jpg/1599px-Polar_Bear_AdF.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/6/66/Polar_Bear_-_Alaska_%28cropped%29.jpg"]
 # code is written to be able to jointly infer speaker's rationality and neural model, but for simplicity, let's assume these are fixed
 # the rationality of the S1
 rat = [100.0]

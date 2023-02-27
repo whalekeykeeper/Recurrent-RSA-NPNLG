@@ -46,7 +46,7 @@ def load_image(url, transform=None):
 
     if "200" not in str(response):
         print("Check if you are forbbiden to visit the urls.")
-        
+
     # print(os.listdir())
 
     image = Image.open('data/google_images/img' + hashed_url + '.jpg')
