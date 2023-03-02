@@ -24,7 +24,7 @@ from utils.numpy_functions import make_initial_prior, uniform_vector
 #     "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/First_Student_IC_school_bus_202076.jpg/220px-First_Student_IC_school_bus_202076.jpg"
 # ]
 
-# Qin: If an URL is visited too much, wikipedia might ban the visit. A "PIL.UnidentifiedImageError" will occur. In
+# Qin: If a URL is visited too much, wikipedia might ban the visit. A "PIL.UnidentifiedImageError" will occur. In
 # this case, just try to get some new URLs.
 urls = [
     "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Polar_Bear_AdF.jpg/1599px-Polar_Bear_AdF.jpg",
@@ -34,7 +34,7 @@ urls = [
 # the rationality of the S1
 rat = [100.0]
 # the neural model: captions trained on MSCOCO ("coco") are more verbose than VisualGenome ("vg")
-model = ["vg"]
+model = ["coco"]
 number_of_images = len(urls)
 # the model starts of assuming it's equally likely any image is the intended referent
 initial_image_prior = uniform_vector(number_of_images)

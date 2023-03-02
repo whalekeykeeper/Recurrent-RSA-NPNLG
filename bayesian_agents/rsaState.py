@@ -1,3 +1,5 @@
+# Qin: This script seems to be used nowhere.
+
 import numpy as np
 
 from utils.image_and_text_utils import max_sentence_length, vectorize_caption
