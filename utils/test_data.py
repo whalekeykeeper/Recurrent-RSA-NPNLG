@@ -1,3 +1,6 @@
+#Qin: I think this is a temporary script...
+
+
 # show a first images and their ground truth captions
 # check that stored rep = generated rep for a few random ones
 # cehck that unmemoized is same as memoized
