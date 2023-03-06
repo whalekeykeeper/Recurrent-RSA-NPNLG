@@ -9,3 +9,11 @@ data/.DS_Store
 data/google_images/
 data/models/A3DS/
 utils/shell/charpragcap/resources/
+data/models/COCO/google-cloud-sdk/
+data/images/
+data/annotations/
+data/results/
+data/models/coco-decoder-5-3000.pkl
+data/models/lang_mod-decoder-5-3000.pkl
+data/models/coco-decoder-5-3000.pkl
+utils/pycocotools_copy_for_this_repo/
