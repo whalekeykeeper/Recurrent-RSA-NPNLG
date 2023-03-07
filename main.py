@@ -2,41 +2,47 @@
 
 import matplotlib
 
-matplotlib.use('Agg')
-import re
-import requests
-import time
+matplotlib.use("Agg")
 import pickle
-import tensorflow as tf
-import numpy as np
-from keras.preprocessing import image
+import re
+import time
 from collections import defaultdict
 
-from utils.config import *
-from utils.numpy_functions import uniform_vector, make_initial_prior
-from recursion_schemes.recursion_schemes import ana_greedy, ana_beam
+import numpy as np
+import requests
+import tensorflow as tf
+from keras.preprocessing import image
+
 from bayesian_agents.joint_rsa import RSA
+from recursion_schemes.recursion_schemes import ana_beam, ana_greedy
+from utils.config import *
+from utils.numpy_functions import make_initial_prior, uniform_vector
+
 #
 # urls = [
 #     "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Arriva_T6_nearside.JPG/1200px-Arriva_T6_nearside.JPG",
 #     "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/First_Student_IC_school_bus_202076.jpg/220px-First_Student_IC_school_bus_202076.jpg"
 # ]
 
-# Qin: If an URL is visited too much, wikipedia might ban the visit. A "PIL.UnidentifiedImageError" will occur. In
+# Qin: If a URL is visited too much, wikipedia might ban the visit. A "PIL.UnidentifiedImageError" will occur. In
 # this case, just try to get some new URLs.
-urls = ["https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Polar_Bear_AdF.jpg/1599px-Polar_Bear_AdF.jpg",
-        "https://upload.wikimedia.org/wikipedia/commons/6/66/Polar_Bear_-_Alaska_%28cropped%29.jpg"]
+urls = [
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRnaWSDM__KaWGxTPrpMpwF5DvgJ-U4cfyL4g&usqp=CAU",
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcrNMOpyvmHPShc9fb6tLar5UJnReaNmj7bQ&usqp=CAU",
+]
 # code is written to be able to jointly infer speaker's rationality and neural model, but for simplicity, let's assume these are fixed
 # the rationality of the S1
 rat = [100.0]
 # the neural model: captions trained on MSCOCO ("coco") are more verbose than VisualGenome ("vg")
-model = ["vg"]
+model = ["coco"]
 number_of_images = len(urls)
 # the model starts of assuming it's equally likely any image is the intended referent
 initial_image_prior = uniform_vector(number_of_images)
 initial_rationality_prior = uniform_vector(1)
 initial_speaker_prior = uniform_vector(1)
-initial_world_prior = make_initial_prior(initial_image_prior, initial_rationality_prior, initial_speaker_prior)
+initial_world_prior = make_initial_prior(
+    initial_image_prior, initial_rationality_prior, initial_speaker_prior
+)
 
 # make a character level speaker, using torch model (instead of tensorflow model)
 speaker_model = RSA(seg_type="char", tf=False)
@@ -52,7 +58,8 @@ literal_caption = ana_greedy(
     speaker_rationality=0,
     speaker=0,
     start_from=list(""),
-    initial_world_prior=initial_world_prior)
+    initial_world_prior=initial_world_prior,
+)
 
 pragmatic_caption = ana_greedy(
     speaker_model,
@@ -61,7 +68,8 @@ pragmatic_caption = ana_greedy(
     speaker_rationality=0,
     speaker=0,
     start_from=list(""),
-    initial_world_prior=initial_world_prior)
+    initial_world_prior=initial_world_prior,
+)
 
 print("Literal caption:\n", literal_caption)
 print("Pragmatic caption:\n", pragmatic_caption)

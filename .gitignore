@@ -7,3 +7,20 @@ data/.DS_Store
 
 
 data/google_images/
+data/models/A3DS/
+utils/shell/charpragcap/resources/
+data/models/COCO/google-cloud-sdk/
+data/images/
+data/models/coco-decoder-5-3000.pkl
+data/models/lang_mod-decoder-5-3000.pkl
+data/models/coco-decoder-5-3000.pkl
+utils/pycocotools_copy_for_this_repo/
+/ann/
+utils/cocoCaption_myVersion/
+
+# Ignore pickles
+*.pkl
+**/*.pkl
+utils/cocoCaptionWithSalanizPycocoevalcap/pycocoevalcap/tokenizer/stanford-corenlp-3.4.1.jar
+utils/cocoCaptionWithSalanizPycocoevalcap/pycocoevalcap/spice/lib/stanford-corenlp-3.6.0-models.jar
+utils/cocoCaptionWithSalanizPycocoevalcap/pycocoevalcap/spice/
