@@ -39,6 +39,7 @@ class Model:
         # Build Models
         self.encoder = EncoderCNN(embed_size)
         self.encoder.eval()  # evaluation mode (BN uses moving mean/variance)
+
         self.decoder = DecoderRNN(embed_size, hidden_size, output_size, num_layers)
 
         # Load the trained model parameters

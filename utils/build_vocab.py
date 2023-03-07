@@ -4,7 +4,7 @@ from collections import Counter
 
 import nltk
 
-from utils.pycocotools.coco import COCO
+from utils.cocoapi.PythonAPI.pycocotools.coco import COCO
 
 
 class Vocabulary(object):

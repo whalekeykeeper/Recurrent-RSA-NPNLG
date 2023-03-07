@@ -27,8 +27,8 @@ from utils.numpy_functions import make_initial_prior, uniform_vector
 # Qin: If a URL is visited too much, wikipedia might ban the visit. A "PIL.UnidentifiedImageError" will occur. In
 # this case, just try to get some new URLs.
 urls = [
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Polar_Bear_AdF.jpg/1599px-Polar_Bear_AdF.jpg",
-    "https://upload.wikimedia.org/wikipedia/commons/6/66/Polar_Bear_-_Alaska_%28cropped%29.jpg",
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRnaWSDM__KaWGxTPrpMpwF5DvgJ-U4cfyL4g&usqp=CAU",
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcrNMOpyvmHPShc9fb6tLar5UJnReaNmj7bQ&usqp=CAU",
 ]
 # code is written to be able to jointly infer speaker's rationality and neural model, but for simplicity, let's assume these are fixed
 # the rationality of the S1
