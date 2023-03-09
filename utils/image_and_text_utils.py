@@ -238,7 +238,7 @@ def get_img(url):
 
     import requests
     from charpragcap.resources.models.resnet import resnet
-    from charpragcap.utils.config import img_rep_layer
+    from config import img_rep_layer
     from keras.preprocessing import image
     from PIL import Image as PIL_Image
 

@@ -14,8 +14,12 @@ urls = [url1, url2, url3, url4, url5, url6, url7, url8]
 
 url9 = "https://assets.bwbx.io/images/users/iqjWHBFdfxIU/i6bua_ZLxNG0/v1/800x-1.jpg"
 
-# img_and_reps = pickle.load(open("charpragcap/resources/img_and_reps",'rb'))
 
 
-# urls = [url1,url2]
-# reps = [img_and_reps[url] for url in urls]
+
+
+
+img_and_reps = pickle.load(open("charpragcap/resources/img_and_reps",'rb'))
+
+urls = [url1,url2]
+reps = [img_and_reps[url] for url in urls]

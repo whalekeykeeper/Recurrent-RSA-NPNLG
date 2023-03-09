@@ -2,8 +2,8 @@ import math
 import os.path
 from subprocess import call
 
-from charpragcap.utils.config import *
-from charpragcap.utils.image_and_text_utils import (
+from config import *
+from image_and_text_utils import (
     char_to_index,
     edit_region,
     get_img_from_id,

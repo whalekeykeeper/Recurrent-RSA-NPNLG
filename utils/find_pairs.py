@@ -1,7 +1,7 @@
 import pickle
 import re
 
-from charpragcap.utils.image_and_text_utils import (
+from image_and_text_utils import (
     devectorize_caption,
     index_to_char,
     split_dataset,

@@ -3,8 +3,8 @@ import pickle
 import more_itertools
 import numpy as np
 from charpragcap.resources.models.resnet import resnet
-from charpragcap.utils.config import *
-from charpragcap.utils.image_and_text_utils import (
+from config import *
+from image_and_text_utils import (
     get_img_from_id,
     index_to_char,
     split_dataset,

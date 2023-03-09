@@ -3,15 +3,15 @@ import pickle
 import numpy as np
 from charpragcap.rsa.cataRSA import CataRSA
 from charpragcap.rsa.cataRSA_working_beam import CataRSA as CataRSA_working_beam
-from charpragcap.utils.config import *
-from charpragcap.utils.generate_clusters import generate_clusters
-from charpragcap.utils.image_and_text_utils import (
+from config import *
+import generate_clusters
+from image_and_text_utils import (
     char_to_index,
     get_rep_from_img_id,
     split_dataset,
     vectorize_caption,
 )
-from charpragcap.utils.urls import reps
+from urls import reps
 
 id_to_caption = pickle.load(open("charpragcap/resources/id_to_caption", "rb"))
 train, val, test = split_dataset(id_to_caption)
