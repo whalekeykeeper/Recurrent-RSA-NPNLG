@@ -26,6 +26,11 @@ torchvision = "0.14.1"
 tqdm = "4.64.1"
 
 
+[tool.poetry.group.dev.dependencies]
+pylance = "^0.3.13"
+autopep8 = "^2.0.2"
+flake8 = "^6.0.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
