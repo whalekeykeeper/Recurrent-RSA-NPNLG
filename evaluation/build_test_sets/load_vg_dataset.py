@@ -7,8 +7,14 @@ import requests
 
 
 def _download_asset(url: str, outpath: str):
-    print("Downloading", url, "to", outpath)
     final_zip_path = outpath + ".zip"
+    final_path = outpath + ".json"
+
+    if os.path.exists(final_path):
+        return
+
+    print("Downloading", url, "to", outpath)
+
     with open(final_zip_path, "wb") as f:
         r = requests.get(url, stream=True)
         copyfileobj(r.raw, f)
@@ -17,7 +23,7 @@ def _download_asset(url: str, outpath: str):
 
     for f in os.listdir(outpath):
         current_path = os.path.join(outpath, f)
-        os.rename(current_path, outpath + ".json")
+        os.rename(current_path, final_path)
 
     os.remove(final_zip_path)
     os.rmdir(outpath)
