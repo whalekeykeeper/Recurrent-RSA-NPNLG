@@ -10,7 +10,8 @@ def evaluate_ts1(test_set: types.TS1):
         if (is_correct_prediction):
             correctly_predicted += 1
         total += 1
-        print(f"Evaluated TS1 / cluster {cluster['cluster_id']}")
+        print(
+            f"Evaluated TS1 / {cluster['object_type']} / cluster {cluster['cluster_id']}")
         print(
             f"Accuracy so far: {correctly_predicted / total} ({correctly_predicted} / {total})")
         print("\n-----------------------\n")
