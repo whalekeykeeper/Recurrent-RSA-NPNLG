@@ -1,10 +1,11 @@
 import math
 from matplotlib import pyplot as plt
 from matplotlib.patches import Rectangle
-from .vg_types import ImageObject, ImageRegion, Metadata, Regions, TS1_Raw_Cluster, TS1_Item, ImageDef
+from .vg_types import ImageObject, ImageRegion, Metadata, Regions, TS1_Raw_Cluster, TS1_Item, ImageDef, TS2_Raw_Cluster
 from shutil import copyfileobj
 from typing import List
-
+from itertools import combinations
+from functools import cache
 from PIL import Image as PIL_Image
 import requests
 
@@ -84,7 +85,7 @@ def get_object_bounding_region(image_id: int, object: ImageObject, regions: Regi
     return min(same_image_regions, key=_sorter)
 
 
-def visualize_cluster(cluster: TS1_Raw_Cluster, regions: Regions, object_type: str = None, cluster_id: int = None):
+def visualize_ts1_cluster(cluster: TS1_Raw_Cluster, regions: Regions, object_type: str = None, cluster_id: int = None):
     for image_id, object in cluster:
         data_dir = os.path.join(os.getcwd(), "data", "vg",
                                 "object_region_visualizations", object_type, str(cluster_id))
@@ -125,7 +126,7 @@ def download_image(image_id: int, metadata: Metadata) -> str:
     return image_path, image_url
 
 
-def process_cluster(cluster: TS1_Raw_Cluster, metadata: Metadata = None, object_type: str = "", cluster_id: int = 1) -> TS1_Item:
+def process_ts1_cluster(cluster: TS1_Raw_Cluster, metadata: Metadata = None, object_type: str = "", cluster_id: int = 1) -> TS1_Item:
 
     print(
         f"Processing TS1 cluster {cluster_id} for object type '{object_type}'")
@@ -168,3 +169,64 @@ def process_cluster(cluster: TS1_Raw_Cluster, metadata: Metadata = None, object_
     }
 
     return ts1_item
+
+
+def visualize_image_region(image_id: int, region: ImageRegion, save_path: str = None):
+    """
+    Visualize a region of an image in the Visual Genome dataset
+    """
+
+    image_path = f"data/vg/images/{image_id}.jpg"
+
+    with open(image_path, "rb") as f:
+        image = PIL_Image.open(f)
+        plt.imshow(image)
+
+    ax = plt.gca()
+    ax.add_patch(
+        Rectangle(
+            (region["x"], region["y"]),
+            region["width"],
+            region["height"],
+            fill=False,
+            edgecolor="yellow",
+            linewidth=3
+        ))
+    ax.text(region["x"], region["y"], region["phrase"], style='italic', bbox={
+            'facecolor': 'white', 'alpha': 0.7, 'pad': 5})
+
+    plt.tick_params(labelbottom='off', labelleft='off')
+    if save_path is not None:
+        plt.savefig(
+            save_path)
+
+    plt.cla()
+    # plt.show()
+
+
+def avg_word_overlap(cluster: TS2_Raw_Cluster) -> float:
+    """
+    Compute average word overlap in a cluster of image 
+    regions of the VG dataset
+    """
+    phrases = [x[1]["phrase"] for x in cluster]
+    sets = [set(x.split()) for x in phrases]
+    intersections = sets[0]
+    for s in sets[1:]:
+        intersections = intersections.intersection(s)
+    return len(intersections)
+
+
+def visualize_ts2_cluster(cluster: TS2_Raw_Cluster, cluster_id: int = None):
+    for image_id, region in cluster:
+        data_dir = os.path.join(os.getcwd(), "data", "vg",
+                                "region_visualizations", str(cluster_id))
+        try:
+            os.makedirs(data_dir)
+        except FileExistsError:
+            pass
+
+        out_path = os.path.join(
+            data_dir, f"{image_id}_{region['region_id']}.png")
+        visualize_image_region(
+            image_id, region, save_path=out_path)

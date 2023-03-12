@@ -78,6 +78,11 @@ class TS1_Item (TypedDict):
     object_type: str
 
 
+TS2_Raw_Cluster = List[Tuple[int, ImageRegion]]
+
+TS2_Raw_Clusters = List[TS2_Raw_Cluster]
+
+
 class TS2_Item (TypedDict):
     target: ImageDef
     distractors: List[ImageDef]
