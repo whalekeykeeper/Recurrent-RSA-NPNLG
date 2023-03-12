@@ -1,5 +1,5 @@
 from .vg_types import TS1, TS2, Objects, Regions, ImageObject, ImageRegion, Metadata
-from .util import euclidean_distance, visualize_image_object_and_region, download_image
+from .util import euclidean_distance, visualize_image_object_and_region, download_image, satisifies_minimum_dimensions
 import random
 from typing import Tuple, List
 
@@ -18,7 +18,7 @@ def _get_random_objects(object_type: str = "person", n: int = 10, objects: Objec
         image_id = image["image_id"]
         image_objects = image["objects"]
         for object in image_objects:
-            if object_type in object["names"]:
+            if object_type in object["names"] and satisifies_minimum_dimensions(object):
                 same_type_objects.append((image_id, object))
 
     return random.sample(same_type_objects, n)

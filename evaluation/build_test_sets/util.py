@@ -70,3 +70,7 @@ def download_image(image_id: int, metadata: Metadata):
     with open(image_path, "wb") as f:
         response = requests.get(image_url, stream=True)
         copyfileobj(response.raw, f)
+
+
+def satisifies_minimum_dimensions(object: ImageObject, min_dims: int = 100):
+    return object["w"] > min_dims and object["h"] > min_dims
