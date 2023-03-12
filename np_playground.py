@@ -1,4 +1,6 @@
-import numpy as np
+import json
 
-a = np.array([1, 1, 1, 1, 1, 1])
-print(a.reshape(6, 1, 1))
+with open("data/vg/region_descriptions.json", "r") as f:
+    region_descriptions = json.load(f)
+
+print(region_descriptions[0])
