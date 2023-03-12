@@ -95,14 +95,21 @@ class Model:
         else:
             from utils.sample import load_image, load_image_from_path, to_var
 
-            if urls_are_local:
-                self.features = [
-                    self.encoder(to_var(load_image_from_path(url, self.transform))) for url in images
-                ]
-            else:
-                self.features = [
-                    self.encoder(to_var(load_image(url, self.transform))) for url in images
-                ]
+            def _load_image(url):
+                try:
+                    if urls_are_local:
+                        return load_image_from_path(url, self.transform)
+                    else:
+                        return load_image(url, self.transform)
+                except Exception as e:
+                    print("[ERROR]", e)
+                    print(url)
+                    return load_image_from_path("data/default.jpg", self.transform)
+
+            self.features = [
+                self.encoder(to_var(_load_image(url))) for url in images
+            ]
+
             self.default_image = self.encoder(
                 to_var(load_image_from_path("data/default.jpg", self.transform))
             )
