@@ -1,14 +1,17 @@
 import math
-from matplotlib import pyplot as plt
-from matplotlib.patches import Rectangle
-from .vg_types import ImageObject, ImageRegion, Metadata, Regions, TS1_Raw_Cluster, TS1_Item, ImageDef, TS2_Raw_Cluster
+import os
+from functools import cache
+from itertools import combinations
 from shutil import copyfileobj
 from typing import List
-from itertools import combinations
-from functools import cache
-from PIL import Image as PIL_Image
+
 import requests
-import os
+from matplotlib import pyplot as plt
+from matplotlib.patches import Rectangle
+from PIL import Image as PIL_Image
+
+from .vg_types import (ImageDef, ImageObject, ImageRegion, Metadata, Regions,
+                       TS1_Item, TS1_Raw_Cluster, TS2_Raw_Cluster, TS2_Item)
 
 
 def visualize_image_object_and_region(image_id: int, object: ImageObject, region: ImageRegion, save_path: str = None):
@@ -233,3 +236,47 @@ def visualize_ts2_cluster(cluster: TS2_Raw_Cluster, cluster_id: int = None):
             data_dir, f"{image_id}_{region['region_id']}.png")
         visualize_image_region(
             image_id, region, save_path=out_path)
+
+
+def process_ts2_cluster(cluster: TS2_Raw_Cluster, metadata: Metadata = None, cluster_id: int = 1) -> TS2_Item:
+
+    print(
+        f"Processing TS2 cluster {cluster_id}")
+
+    data_dir = os.path.join(os.getcwd(), "data", "test_sets",
+                            "ts2", str(cluster_id))
+
+    try:
+        os.makedirs(data_dir)
+    except FileExistsError:
+        pass
+
+    images: List[ImageDef] = []
+
+    for image_id, region in cluster:
+        full_image_local_path, remote_url = download_image(image_id, metadata)
+        output_image_name = f"{image_id}_{region['region_id']}.jpg"
+        cropped_image_path = os.path.join(
+            data_dir,
+            output_image_name
+        )
+        with open(full_image_local_path, "rb") as f:
+            image = PIL_Image.open(f)
+            crop_definition = (region["x"], region["y"], region["x"] + region["width"],
+                               region["y"] + region["height"])
+            cropped = image.crop(crop_definition)
+            cropped.save(cropped_image_path)
+            images.append({
+                "local_path": os.path.join("data", "test_sets", "ts2", str(cluster_id), output_image_name),
+                "original_image_id": image_id,
+                "original_region_id": region["region_id"],
+                "remote_url": remote_url
+            })
+
+    ts2_item: TS2_Item = {
+        "target": images[0],
+        "distractors": images[1:],
+        "cluster_id": cluster_id,
+    }
+
+    return ts2_item
