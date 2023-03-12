@@ -1,7 +1,6 @@
 import json
 from itertools import product
+import numpy as np
 
-with open("data/vg/region_descriptions.json", "r") as f:
-    region_descriptions = json.load(f)
-
-print(list(product([1, 2, 3], [4, 5, 6])))
+a = np.full((10, 1, 1), 2)
+print(a.reshape((10,)))

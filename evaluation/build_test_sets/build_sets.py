@@ -42,6 +42,12 @@ def _get_object_clusters(object_type: str = "person", n_cluster_items: int = 10,
 
 def build_ts1(objects: Objects = None, regions: Regions = None, metadata: Metadata = None) -> TS1:
 
+    test_set_path = "data/test_sets/ts1/ts1.json"
+
+    if os.path.exists(test_set_path):
+        with open(test_set_path, "r") as f:
+            return json.load(f)
+
     target_objects_types = [
         "man",
         "person",
@@ -75,7 +81,7 @@ def build_ts1(objects: Objects = None, regions: Regions = None, metadata: Metada
             visualize_ts1_cluster(cluster, regions=regions,
                                   object_type=object_type, cluster_id=i)
 
-    with open("data/test_sets/ts1/ts1.json", "w") as f:
+    with open(test_set_path, "w") as f:
         json.dump(test_set, f, indent=4)
 
     return test_set
@@ -128,6 +134,12 @@ def _get_region_clusters(regions: Regions = None, n_cluster_items: int = 10, n_c
 
 
 def build_ts2(regions: Regions = None, metadata: Metadata = None) -> TS2:
+    test_set_path = "data/test_sets/ts2/ts2.json"
+
+    if os.path.exists(test_set_path):
+        with open(test_set_path, "r") as f:
+            return json.load(f)
+
     clusters = _get_region_clusters(
         regions=regions, n_cluster_items=10, n_clusters=100)
 
@@ -142,5 +154,5 @@ def build_ts2(regions: Regions = None, metadata: Metadata = None) -> TS2:
         test_set.append(processed_cluster)
         visualize_ts2_cluster(cluster, cluster_id=i)
 
-    with open("data/test_sets/ts2/ts2.json", "w") as f:
+    with open(test_set_path, "w") as f:
         json.dump(test_set, f, indent=4)

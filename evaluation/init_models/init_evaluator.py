@@ -14,8 +14,8 @@ def init_evaluator(urls: List[str]):
     speaker_model.initialize_speakers(model)
     # set the possible images and rationalities
     speaker_model.speaker_prior.set_features(
-        images=urls, tf=False, rationalities=rat)
+        images=urls, tf=False, rationalities=rat, urls_are_local=True)
     speaker_model.initial_speakers[0].set_features(
-        images=urls, tf=False, rationalities=rat)
+        images=urls, tf=False, rationalities=rat, urls_are_local=True)
 
     return speaker_model
