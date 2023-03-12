@@ -1,10 +1,15 @@
-from .vg_types import TS1, TS2, Objects, Regions, ImageObject, ImageRegion, Metadata
-from .util import euclidean_distance, visualize_image_object_and_region, download_image, satisifies_minimum_dimensions
 import random
-from typing import Tuple, List
+import json
+
+from .util import (process_cluster,
+                   satisifies_minimum_dimensions,
+                   visualize_cluster
+                   )
+from .vg_types import (TS1, TS1_Item, TS2, Metadata, Objects,
+                       Regions, TS1_Raw_Clusters, TS1_Raw_Cluster)
 
 
-def _get_random_objects(object_type: str = "person", n: int = 10, objects: Objects = None) -> List[Tuple[int, ImageObject]]:
+def _get_object_clusters(object_type: str = "person", n_cluster_items: int = 10, n_clusters: int = 10, objects: Objects = None) -> TS1_Raw_Clusters:
     """
     Get a random sample of objects of the given type.
     """
@@ -21,57 +26,57 @@ def _get_random_objects(object_type: str = "person", n: int = 10, objects: Objec
             if object_type in object["names"] and satisifies_minimum_dimensions(object):
                 same_type_objects.append((image_id, object))
 
-    return random.sample(same_type_objects, n)
+    random.shuffle(same_type_objects)
 
+    clusters = []
 
-def _get_object_bounding_region(image_id: int, object: ImageObject, regions: Regions):
-    """
-    Given an object in an image in the Visual Genome dataset, find the
-    region of that image that most closely fits the object.
-    """
+    for i in range(n_clusters):
+        items = same_type_objects[i *
+                                  n_cluster_items: (i + 1) * n_cluster_items]
+        clusters.append(items)
 
-    same_image_regions = next(
-        filter(lambda x: x["id"] == image_id, regions))["regions"]
-
-    object_a = (object["x"], object["y"])
-    object_b = (object["x"] + object["w"], object["y"] + object["h"])
-
-    def _sorter(x: ImageRegion):
-        # Sort the regions of the image in such a way that the best
-        # bounding region for the object is first.
-
-        region_a = (x["x"], x["y"])
-        region_b = (x["x"] + x["width"], x["y"] + x["height"])
-
-        distance_a = euclidean_distance(object_a, region_a)
-        distance_b = euclidean_distance(object_b, region_b)
-
-        return distance_a + distance_b
-
-    return min(same_image_regions, key=_sorter)
+    return clusters
 
 
 def build_ts1(objects: Objects = None, regions: Regions = None, metadata: Metadata = None) -> TS1:
 
-    target_objects = [
+    target_objects_types = [
         "man",
-        # "person",
-        # "woman",
-        # "building",
-        # "sign",
-        # "table",
-        # "bus",
-        # "window",
-        # "sky",
-        # "tree"
+        "person",
+        "woman",
+        "building",
+        "sign",
+        "table",
+        "bus",
+        "window",
+        "sky",
+        "tree"
     ]
 
-    objects = _get_random_objects(object_type="person", n=10, objects=objects)
+    test_set: TS1 = []
 
-    for image_id, object in objects:
-        download_image(image_id, metadata)
-        region = _get_object_bounding_region(image_id, object, regions)
-        visualize_image_object_and_region(image_id, object, region)
+    for object_type in target_objects_types:
+
+        clusters = _get_object_clusters(
+            object_type=object_type, n_cluster_items=10, n_clusters=10, objects=objects)
+
+        for i, cluster in enumerate(clusters):
+            processed_cluster: TS1_Item = process_cluster(
+                cluster, metadata=metadata, object_type=object_type, cluster_id=i)
+            test_set.append(processed_cluster)
+
+            # Optionally, visualize the objects and regions in the cluster.
+            # Images will be saved to the data/vg/object_region_visualizations folder.
+            # It is important to call this after process_cluster as otherwise
+            # the images are not downloaded.
+
+            visualize_cluster(cluster, regions=regions,
+                              object_type=object_type, cluster_id=i)
+
+    with open("data/test_sets/ts1/ts1.json", "w") as f:
+        json.dump(test_set, f, indent=4)
+
+    return test_set
 
 
 def build_ts2() -> TS2:

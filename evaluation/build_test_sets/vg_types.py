@@ -1,4 +1,4 @@
-from typing import List, TypedDict
+from typing import List, TypedDict, Tuple
 
 # Metadata types
 
@@ -59,14 +59,28 @@ Regions = List[ImageRegions]
 
 # Test set types
 
+class ImageDef(TypedDict):
+    local_path: str
+    remote_url: str
+    original_image_id: int
+    original_object_id: int
+
+
+TS1_Raw_Cluster = List[Tuple[int, ImageObject]]
+
+TS1_Raw_Clusters = List[TS1_Raw_Cluster]
+
+
 class TS1_Item (TypedDict):
-    target: str
-    distractors: List[str]
+    target: ImageDef
+    distractors: List[ImageDef]
+    cluster_id: int
+    object_type: str
 
 
 class TS2_Item (TypedDict):
-    target: str
-    distractors: List[str]
+    target: ImageDef
+    distractors: List[ImageDef]
 
 
 TS1 = List[TS1_Item]

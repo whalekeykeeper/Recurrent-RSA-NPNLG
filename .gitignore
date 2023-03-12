@@ -18,6 +18,7 @@ utils/pycocotools_copy_for_this_repo/
 /ann/
 utils/cocoCaption_myVersion/
 data/vg
+data/test_sets
 
 # Ignore pickles
 *.pkl
