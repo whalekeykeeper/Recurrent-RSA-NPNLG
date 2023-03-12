@@ -1,11 +1,9 @@
 import json
 import random
-from itertools import product
 from typing import List, MutableSet, Tuple
 
-from tqdm import tqdm
-
-from .util import (avg_word_overlap, download_image, object_satisifies_minimum_dimensions,
+import os
+from .util import (avg_word_overlap, object_satisifies_minimum_dimensions,
                    process_ts1_cluster, region_satisfies_minimum_dimensions,
                    visualize_ts1_cluster, visualize_ts2_cluster, process_ts2_cluster)
 from .vg_types import (TS1, TS2, ImageRegion, Metadata, Objects, Regions,
@@ -139,7 +137,8 @@ def build_ts2(regions: Regions = None, metadata: Metadata = None) -> TS2:
     test_set: TS2 = []
 
     for i, cluster in enumerate(clusters):
-        processed_cluster = process_ts2_cluster(cluster, metadata=metadata)
+        processed_cluster = process_ts2_cluster(
+            cluster, metadata=metadata, cluster_id=i)
         test_set.append(processed_cluster)
         visualize_ts2_cluster(cluster, cluster_id=i)
 
