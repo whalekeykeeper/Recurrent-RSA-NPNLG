@@ -1,6 +1,7 @@
 import json
+from itertools import product
 
 with open("data/vg/region_descriptions.json", "r") as f:
     region_descriptions = json.load(f)
 
-print(region_descriptions[0])
+print(list(product([1, 2, 3], [4, 5, 6])))

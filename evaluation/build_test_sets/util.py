@@ -8,7 +8,6 @@ from itertools import combinations
 from functools import cache
 from PIL import Image as PIL_Image
 import requests
-
 import os
 
 
@@ -102,8 +101,12 @@ def visualize_ts1_cluster(cluster: TS1_Raw_Cluster, regions: Regions, object_typ
             image_id, object, region, save_path=out_path)
 
 
-def satisifies_minimum_dimensions(object: ImageObject, min_dims: int = 100):
+def object_satisifies_minimum_dimensions(object: ImageObject, min_dims: int = 100):
     return object["w"] > min_dims and object["h"] > min_dims
+
+
+def region_satisfies_minimum_dimensions(region: ImageRegion, min_dims: int = 100):
+    return region["width"] > min_dims and region["height"] > min_dims
 
 
 def download_image(image_id: int, metadata: Metadata) -> str:
