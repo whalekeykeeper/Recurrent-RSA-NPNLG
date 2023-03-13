@@ -1,9 +1,10 @@
 import json
-from .vg_types import Metadata, Objects, Regions
+from .vg_types import Metadata, Objects, Regions, ImageRegion, Attributes, ImageObject
 import os
 import zipfile
 from shutil import copyfileobj
 import requests
+from typing import Dict, List
 
 
 def _download_asset(url: str, outpath: str):
@@ -30,9 +31,10 @@ def _download_asset(url: str, outpath: str):
 
 
 def download_vg_assets():
-    objects_url = "http://visualgenome.org/static/data/dataset/objects.json.zip"
-    regions_url = "http://visualgenome.org/static/data/dataset/region_descriptions.json.zip"
+    objects_url = "http://visualgenome.org/static/data/dataset/image_data_v1.json.zip"
+    regions_url = "http://visualgenome.org/static/data/dataset/region_descriptions_v1.json.zip"
     metadata_url = "http://visualgenome.org/static/data/dataset/image_data.json.zip"
+    attributes_url = "http://visualgenome.org/static/data/dataset/attributes_v1.json.zip"
     data_dir = os.path.join(os.getcwd(), "data", "vg")
 
     try:
@@ -44,18 +46,62 @@ def download_vg_assets():
     _download_asset(regions_url, os.path.join(
         data_dir, "region_descriptions"))
     _download_asset(metadata_url, os.path.join(data_dir, "image_data"))
+    _download_asset(attributes_url, os.path.join(data_dir, "attributes"))
 
 
 def _load_regions() -> Regions:
     with open("data/vg/region_descriptions.json", "r") as f:
         region_descriptions = json.load(f)
-    return region_descriptions
+    d: Dict[int, List[ImageRegion]] = {}
+    for definition in region_descriptions:
+        image_id = definition["id"]
+        regions = definition["regions"]
+        if image_id not in d:
+            d[image_id] = []
+        for region in regions:
+            d[image_id].append({
+                "image_id": image_id,
+                "region_id": region["id"],
+                "x": region["x"],
+                "y": region["y"],
+                "height": region["height"],
+                "width": region["width"],
+                "phrase": region["phrase"],
+            })
+    r: Regions = []
+    for key, value in d.items():
+        r.append({
+            "id": key,
+            "regions": value
+        })
+    return r
 
 
-def _load_objects() -> Objects:
-    with open("data/vg/objects.json", "r") as f:
-        object_descriptions = json.load(f)
-    return object_descriptions
+def _load_objects(attributes: Attributes) -> Objects:
+    d: Dict[int, List[ImageObject]] = {}
+    for definition in attributes:
+        image_id = definition["id"]
+        objects = definition["attributes"]
+        if not image_id in d:
+            d[image_id] = []
+        for obj in objects:
+            d[image_id].append({
+                "object_id": obj["id"],
+                "merged_object_ids": [],
+                "names": obj["object_names"],
+                "synsets": [],
+                "h": obj["h"],
+                "w": obj["w"],
+                "x": obj["x"],
+                "y": obj["y"],
+            })
+    o: Objects = []
+    for key, value in d.items():
+        o.append({
+            "image_id": key,
+            "objects": value
+        })
+    return o
 
 
 def _load_metadata() -> Metadata:
@@ -64,9 +110,16 @@ def _load_metadata() -> Metadata:
     return metadata
 
 
+def _load_attributes() -> Attributes:
+    with open("data/vg/attributes.json", "r") as f:
+        attributes = json.load(f)
+    return attributes
+
+
 def load_vg_dataset():
+    attributes = _load_attributes()
     regions = _load_regions()
-    objects = _load_objects()
+    objects = _load_objects(attributes)
     metadata = _load_metadata()
 
     return metadata, regions, objects

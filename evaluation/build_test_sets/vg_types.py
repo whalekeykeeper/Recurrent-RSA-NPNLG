@@ -1,5 +1,17 @@
 from typing import List, TypedDict, Tuple
 
+# Attribute types
+
+
+class AttributeItem(TypedDict):
+    object_id: int
+    name: str
+
+
+class Attributes(TypedDict):
+    image_id: int
+    attributes: List[AttributeItem]
+
 # Metadata types
 
 
