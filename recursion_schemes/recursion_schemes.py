@@ -46,7 +46,8 @@ def likelihood(
         * (1 / self.images.shape[0])
     )
     self.image_priors[0] = img_prior
-    sentence = np.expand_dims(np.expand_dims(vectorize_caption(start_from)[0], 0), -1)
+    sentence = np.expand_dims(np.expand_dims(
+        vectorize_caption(start_from)[0], 0), -1)
     self.context_sentence = copy.deepcopy(sentence)
 
     likelihood = {}
@@ -92,13 +93,15 @@ def ana_greedy(
     """
 
     # this RSA passes along a state: see rsa_state
-    state = RSA_State(initial_world_prior, listener_rationality=listener_rationality)
+    state = RSA_State(initial_world_prior,
+                      listener_rationality=listener_rationality)
     # state.image_priors[:]=img_prior
 
     context_sentence = ["^"] + start_from
     state.context_sentence = context_sentence
 
-    world = RSA_World(target=target, rationality=speaker_rationality, speaker=speaker)
+    world = RSA_World(
+        target=target, rationality=speaker_rationality, speaker=speaker)
 
     probs = []
     for timestep in tqdm(range(len(start_from) + 1, max_sentence_length)):
@@ -162,15 +165,14 @@ def ana_beam(
     decay_rate: a multiplier that makes later decisions in the unrolling matter less: 0.0 does no decay. negative decay makes start matter more
     """
 
-    state = RSA_State(initial_world_prior, listener_rationality=listener_rationality)
+    state = RSA_State(initial_world_prior,
+                      listener_rationality=listener_rationality)
     # state.image_priors[:]=img_prior
 
-    context_sentence = start_from
-    state.context_sentence = context_sentence
+    world = RSA_World(
+        target=target, rationality=speaker_rationality, speaker=speaker)
 
-    world = RSA_World(target=target, rationality=speaker_rationality, speaker=speaker)
-
-    context_sentence = start_from
+    context_sentence = ["^"] + start_from
     state.context_sentence = context_sentence
 
     sent_worldprior_prob = [(state.context_sentence, state.world_priors, 0.0)]
@@ -216,7 +218,8 @@ def ana_beam(
 
                 # print("beam listener",rsa.word2ord[seg], l)
 
-                new_sent_worldprior_prob.append((new_sentence, worldpriors, new_prob))
+                new_sent_worldprior_prob.append(
+                    (new_sentence, worldpriors, new_prob))
 
         rsa.flush_cache()
         sent_worldprior_prob = sorted(
@@ -244,12 +247,17 @@ def ana_beam(
             if len(final_sentences) >= 50:
                 # 	# print("beam unroll time",tic-toc)
                 # 	# print(state.image_priors[:])
-                sentences = sorted(final_sentences, key=lambda x: x[-1], reverse=True)
+                sentences = sorted(
+                    final_sentences, key=lambda x: x[-1], reverse=True)
                 output = []
                 for i, (sent, prob) in enumerate(sentences):
                     output.append(("".join(sent), prob))
 
                 return output
+            elif state.timestep == max_sentence_length - 1:
+                for sent, worldprior, prob in sent_worldprior_prob:
+                    final_sentence = copy.deepcopy(sent)
+                    final_sentences.append((final_sentence, prob))
             # 		# print(sentences)
             # 		for i,(sent,prob) in enumerate(sentences):
 
