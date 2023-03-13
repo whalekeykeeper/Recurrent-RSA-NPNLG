@@ -1,10 +1,15 @@
 import os.path
-from collections import defaultdict
-
 import numpy as np
-from keras.preprocessing import image
 
 from utils.config import *
+import urllib.request
+import pickle
+import requests
+from keras.applications import ResNet50
+from keras.preprocessing import image
+from PIL import Image as PIL_Image
+import shutil
+# from config import img_rep_layer
 
 ###IMAGE UTILS
 
@@ -28,58 +33,7 @@ def overlap(target_box, candidate_box):
     return cond1 or cond2 or cond3 or cond4
 
 
-def edit_region(height, width, x_coordinate, y_coordinate):
-    if width > height:
-        # check if image recentering causes box to go off the image up
-        if y_coordinate + (height / 2) - (width / 2) < 0.0:
-            box = (
-                x_coordinate,
-                y_coordinate,
-                x_coordinate + max(width, height),
-                y_coordinate + max(width, height),
-            )
-        else:
-            box = (
-                x_coordinate,
-                y_coordinate + (height / 2) - (width / 2),
-                x_coordinate + max(width, height),
-                y_coordinate + (height / 2) - (width / 2) + max(width, height),
-            )
-    else:
-        # check if image recentering causes box to go off the image to the left
-        if x_coordinate + (width / 2) - (height / 2) < 0.0:
-            box = (
-                x_coordinate,
-                y_coordinate,
-                x_coordinate + max(width, height),
-                y_coordinate + max(width, height),
-            )
-        else:
-            box = (
-                x_coordinate + (width / 2) - (height / 2),
-                y_coordinate,
-                x_coordinate + (width / 2) - (height / 2) + max(width, height),
-                y_coordinate + max(width, height),
-            )
-
-    return box
-
-
-# determine if a region and caption are suitable for inclusion in data
-def valid_item(height, width, sentence, img_id):
-    ratio = (float(max(height, width))) / float(min(height, width))
-    size = float(height)
-    file_exists = os.path.isfile(IMG_DATA_PATH + "VG_100K/" + str(img_id) + ".jpg")
-    good_length = len(sentence) < max_sentence_length
-    no_punctuation = all((char in sym_set) for char in sentence)
-    return (
-        ratio < 1.25 and size > 100.0 and file_exists and good_length and no_punctuation
-    )
-
-
 def get_img_from_id(item, id_to_caption):
-    from PIL import Image as PIL_Image
-
     img_id, region_id = item.split("_")
     path = IMG_DATA_PATH + "VG_100K/" + img_id + ".jpg"
     img = PIL_Image.open(path)
@@ -93,120 +47,90 @@ def get_img_from_id(item, id_to_caption):
 
     return resized_img
 
+#
+# def get_rep_from_id(item, id_to_caption):
+#     img_id, region_id = item.split("_")
+#     path = IMG_DATA_PATH + "VG_100K/" + img_id + ".jpg"
+#     img = PIL_Image.open(path)
+#     # crop region from img
+#     box = id_to_caption[item][region]
+#     # print("box",box)
+#     cropped_img = img.crop(box)
+#     # print("cropped_img", image.img_to_array(cropped_img))
+#     # resize into square
+#     resized_img = cropped_img.resize([224, 224], PIL_Image.ANTIALIAS)
+#
+#     display(resized_img)
+#
+#     img = np.expand_dims(image.img_to_array(resized_img), 0)
+#
+#     img = ResNet50(img_rep_layer).predict(img)
+#     return img
 
-def get_rep_from_id(item, id_to_caption):
-    from charpragcap.resources.models.resnet import resnet
-    from keras.preprocessing import image
-    from PIL import Image as PIL_Image
-
-    img_id, region_id = item.split("_")
-    path = IMG_DATA_PATH + "VG_100K/" + img_id + ".jpg"
-    img = PIL_Image.open(path)
-    # crop region from img
-    box = id_to_caption[item][region]
-    # print("box",box)
-    cropped_img = img.crop(box)
-    # print("cropped_img", image.img_to_array(cropped_img))
-    # resize into square
-    resized_img = cropped_img.resize([224, 224], PIL_Image.ANTIALIAS)
-
-    display(resized_img)
-
-    img = np.expand_dims(image.img_to_array(resized_img), 0)
-
-    img = resnet(img_rep_layer).predict(img)
-    return img
-
-
-# nb: only the first part of the id, i.e. the image, not the region: doesn't crop
-def get_rep_from_img_id(img_id):
-    import urllib.request
-
-    from charpragcap.resources.models.resnet import resnet
-    from keras.preprocessing import image
-    from PIL import Image as PIL_Image
-
-    path = IMG_DATA_PATH + "VG_100K/" + img_id + ".jpg"
-    img = PIL_Image.open(path)
-    resized_img = img.resize([224, 224], PIL_Image.ANTIALIAS)
-
-    img = np.expand_dims(image.img_to_array(resized_img), 0)
-
-    img = resnet(img_rep_layer).predict(img)
-    return img
+#
+# # nb: only the first part of the id, i.e. the image, not the region: doesn't crop
+# def get_rep_from_img_id(img_id):
+#     path = IMG_DATA_PATH + "VG_100K/" + img_id + ".jpg"
+#     img = PIL_Image.open(path)
+#     resized_img = img.resize([224, 224], PIL_Image.ANTIALIAS)
+#
+#     img = np.expand_dims(image.img_to_array(resized_img), 0)
+#
+#     img = ResNet50(img_rep_layer).predict(img)
+#     return img
 
 
 # TODO use or remove
 
+#
+# def get_img_from_url(url):
+#     response = requests.get(url, stream=True)
+#     with open("charpragcap/resources/img.jpg", "wb") as out_file:
+#         shutil.copyfileobj(response.raw, out_file)
+#     del response
+#
+#     img = PIL_Image.open("charpragcap/resources/img.jpg")
+#
+#     return img
+#
+#     # model = ResNet50(img_rep_layer)
+#
+#     # # file_name = "charpragcap/resources/local-filename.jpg"
+#     # # urllib.request.urlretrieve(url, file_name)
+#     # # img = PIL_Image.open(file_name)
+#
+#     # img = img.resize([224,224],PIL_Image.ANTIALIAS)
+#     # display(img)
+#     # img = np.expand_dims(image.img_to_array(img),0)
+#
+#     # rep = resnet(img_rep_layer).predict(img)
+#     # return rep
 
-def get_img_from_url(url):
-    import shutil
-    import urllib.request
-
-    import requests
-    from charpragcap.resources.models.resnet import resnet
-    from keras.preprocessing import image
-    from PIL import Image as PIL_Image
-
-    response = requests.get(url, stream=True)
-    with open("charpragcap/resources/img.jpg", "wb") as out_file:
-        shutil.copyfileobj(response.raw, out_file)
-    del response
-
-    img = PIL_Image.open("charpragcap/resources/img.jpg")
-
-    return img
-
-    # model = resnet(img_rep_layer)
-
-    # # file_name = "charpragcap/resources/local-filename.jpg"
-    # # urllib.request.urlretrieve(url, file_name)
-    # # img = PIL_Image.open(file_name)
-
-    # img = img.resize([224,224],PIL_Image.ANTIALIAS)
-    # display(img)
-    # img = np.expand_dims(image.img_to_array(img),0)
-
-    # rep = resnet(img_rep_layer).predict(img)
-    # return rep
-
-
-def get_rep_from_url(url, model):
-    import shutil
-    import urllib.request
-
-    import requests
-    from keras.preprocessing import image
-    from PIL import Image as PIL_Image
-
-    response = requests.get(url, stream=True)
-    with open("charpragcap/resources/img.jpg", "wb") as out_file:
-        shutil.copyfileobj(response.raw, out_file)
-    del response
-
-    img = PIL_Image.open("charpragcap/resources/img.jpg")
-
-    # file_name = "charpragcap/resources/local-filename.jpg"
-    # urllib.request.urlretrieve(url, file_name)
-    # img = PIL_Image.open(file_name)
-
-    img = img.resize([224, 224], PIL_Image.ANTIALIAS)
-    # display(img)
-    img = np.expand_dims(image.img_to_array(img), 0)
-
-    rep = model.predict(img)
-    return rep
+#
+# def get_rep_from_url(url, model):
+#     response = requests.get(url, stream=True)
+#     with open("charpragcap/resources/img.jpg", "wb") as out_file:
+#         shutil.copyfileobj(response.raw, out_file)
+#     del response
+#
+#     img = PIL_Image.open("charpragcap/resources/img.jpg")
+#
+#     # file_name = "charpragcap/resources/local-filename.jpg"
+#     # urllib.request.urlretrieve(url, file_name)
+#     # img = PIL_Image.open(file_name)
+#
+#     img = img.resize([224, 224], PIL_Image.ANTIALIAS)
+#     # display(img)
+#     img = np.expand_dims(image.img_to_array(img), 0)
+#
+#     rep = model.predict(img)
+#     return rep
 
 
 # for ipython image displaying
 def display_image(number):
-    import pickle
-
-    from PIL import Image as PIL_Image
-
     id_to_caption = pickle.load(open("charpragcap/resources/id_to_caption", "rb"))
     chosen_id = list(id_to_caption)[number]
-
     img_path = "data/VG_100K/" + str(chosen_id) + ".jpg"
     box = id_to_caption[chosen_id][1]
     img_id, region_id = chosen_id.split("_")
@@ -218,12 +142,6 @@ def display_image(number):
 
 
 def display_img_from_url(url):
-    import shutil
-
-    import requests
-    from keras.preprocessing import image
-    from PIL import Image as PIL_Image
-
     response = requests.get(url, stream=True)
     with open("charpragcap/resources/img.jpg", "wb") as out_file:
         shutil.copyfileobj(response.raw, out_file)
@@ -232,39 +150,26 @@ def display_img_from_url(url):
     img = img.resize([224, 224], PIL_Image.ANTIALIAS)
     display(img)
 
-
-def get_img(url):
-    import shutil
-
-    import requests
-    from charpragcap.resources.models.resnet import resnet
-    from config import img_rep_layer
-    from keras.preprocessing import image
-    from PIL import Image as PIL_Image
-
-    response = requests.get(url, stream=True)
-    with open("charpragcap/resources/img.jpg", "wb") as out_file:
-        shutil.copyfileobj(response.raw, out_file)
-    del response
-    img = PIL_Image.open("charpragcap/resources/img.jpg")
-    img = img.resize([224, 224], PIL_Image.ANTIALIAS)
-    display(img)
-    rep = np.expand_dims(image.img_to_array(img), 0)
-
-    rep = resnet(img_rep_layer).predict(img)
-    return rep
+#
+# def get_img(url):
+#     response = requests.get(url, stream=True)
+#     with open("charpragcap/resources/img.jpg", "wb") as out_file:
+#         shutil.copyfileobj(response.raw, out_file)
+#     del response
+#     img = PIL_Image.open("charpragcap/resources/img.jpg")
+#     img = img.resize([224, 224], PIL_Image.ANTIALIAS)
+#     display(img)
+#     rep = np.expand_dims(image.img_to_array(img), 0)
+#
+#     rep = resnet(img_rep_layer).predict(img)
+#     return rep
 
 
 def item_to_rep(item, id_to_caption):
-    import numpy as np
-    from charpragcap.resources.models.resnet import resnet
-    from keras.preprocessing import image
-
     original_image = get_img_from_id(item, id_to_caption)
     original_image_vector = np.expand_dims(image.img_to_array(original_image), axis=0)
-    input_image = resnet(img_rep_layer).predict(original_image_vector)
+    input_image = ResNet50(img_rep_layer).predict(original_image_vector)
     return input_image
-
 
 ###TEXT UTILS
 
