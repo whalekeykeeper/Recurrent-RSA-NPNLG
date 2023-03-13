@@ -47,84 +47,84 @@ def get_img_from_id(item, id_to_caption):
 
     return resized_img
 
-#
-# def get_rep_from_id(item, id_to_caption):
-#     img_id, region_id = item.split("_")
-#     path = IMG_DATA_PATH + "VG_100K/" + img_id + ".jpg"
-#     img = PIL_Image.open(path)
-#     # crop region from img
-#     box = id_to_caption[item][region]
-#     # print("box",box)
-#     cropped_img = img.crop(box)
-#     # print("cropped_img", image.img_to_array(cropped_img))
-#     # resize into square
-#     resized_img = cropped_img.resize([224, 224], PIL_Image.ANTIALIAS)
-#
-#     display(resized_img)
-#
-#     img = np.expand_dims(image.img_to_array(resized_img), 0)
-#
-#     img = ResNet50(img_rep_layer).predict(img)
-#     return img
 
-#
-# # nb: only the first part of the id, i.e. the image, not the region: doesn't crop
-# def get_rep_from_img_id(img_id):
-#     path = IMG_DATA_PATH + "VG_100K/" + img_id + ".jpg"
-#     img = PIL_Image.open(path)
-#     resized_img = img.resize([224, 224], PIL_Image.ANTIALIAS)
-#
-#     img = np.expand_dims(image.img_to_array(resized_img), 0)
-#
-#     img = ResNet50(img_rep_layer).predict(img)
-#     return img
+def get_rep_from_id(item, id_to_caption):
+    img_id, region_id = item.split("_")
+    path = IMG_DATA_PATH + "VG_100K/" + img_id + ".jpg"
+    img = PIL_Image.open(path)
+    # crop region from img
+    box = id_to_caption[item][region]
+    # print("box",box)
+    cropped_img = img.crop(box)
+    # print("cropped_img", image.img_to_array(cropped_img))
+    # resize into square
+    resized_img = cropped_img.resize([224, 224], PIL_Image.ANTIALIAS)
+
+    display(resized_img)
+
+    img = np.expand_dims(image.img_to_array(resized_img), 0)
+
+    img = ResNet50(img_rep_layer).predict(img)
+    return img
+
+
+# nb: only the first part of the id, i.e. the image, not the region: doesn't crop
+def get_rep_from_img_id(img_id):
+    path = IMG_DATA_PATH + "VG_100K/" + img_id + ".jpg"
+    img = PIL_Image.open(path)
+    resized_img = img.resize([224, 224], PIL_Image.ANTIALIAS)
+
+    img = np.expand_dims(image.img_to_array(resized_img), 0)
+
+    img = ResNet50(img_rep_layer).predict(img)
+    return img
 
 
 # TODO use or remove
 
-#
-# def get_img_from_url(url):
-#     response = requests.get(url, stream=True)
-#     with open("charpragcap/resources/img.jpg", "wb") as out_file:
-#         shutil.copyfileobj(response.raw, out_file)
-#     del response
-#
-#     img = PIL_Image.open("charpragcap/resources/img.jpg")
-#
-#     return img
-#
-#     # model = ResNet50(img_rep_layer)
-#
-#     # # file_name = "charpragcap/resources/local-filename.jpg"
-#     # # urllib.request.urlretrieve(url, file_name)
-#     # # img = PIL_Image.open(file_name)
-#
-#     # img = img.resize([224,224],PIL_Image.ANTIALIAS)
-#     # display(img)
-#     # img = np.expand_dims(image.img_to_array(img),0)
-#
-#     # rep = resnet(img_rep_layer).predict(img)
-#     # return rep
 
-#
-# def get_rep_from_url(url, model):
-#     response = requests.get(url, stream=True)
-#     with open("charpragcap/resources/img.jpg", "wb") as out_file:
-#         shutil.copyfileobj(response.raw, out_file)
-#     del response
-#
-#     img = PIL_Image.open("charpragcap/resources/img.jpg")
-#
-#     # file_name = "charpragcap/resources/local-filename.jpg"
-#     # urllib.request.urlretrieve(url, file_name)
-#     # img = PIL_Image.open(file_name)
-#
-#     img = img.resize([224, 224], PIL_Image.ANTIALIAS)
-#     # display(img)
-#     img = np.expand_dims(image.img_to_array(img), 0)
-#
-#     rep = model.predict(img)
-#     return rep
+def get_img_from_url(url):
+    response = requests.get(url, stream=True)
+    with open("charpragcap/resources/img.jpg", "wb") as out_file:
+        shutil.copyfileobj(response.raw, out_file)
+    del response
+
+    img = PIL_Image.open("charpragcap/resources/img.jpg")
+
+    return img
+
+    # model = ResNet50(img_rep_layer)
+
+    # # file_name = "charpragcap/resources/local-filename.jpg"
+    # # urllib.request.urlretrieve(url, file_name)
+    # # img = PIL_Image.open(file_name)
+
+    # img = img.resize([224,224],PIL_Image.ANTIALIAS)
+    # display(img)
+    # img = np.expand_dims(image.img_to_array(img),0)
+
+    # rep = resnet(img_rep_layer).predict(img)
+    # return rep
+
+
+def get_rep_from_url(url, model):
+    response = requests.get(url, stream=True)
+    with open("charpragcap/resources/img.jpg", "wb") as out_file:
+        shutil.copyfileobj(response.raw, out_file)
+    del response
+
+    img = PIL_Image.open("charpragcap/resources/img.jpg")
+
+    # file_name = "charpragcap/resources/local-filename.jpg"
+    # urllib.request.urlretrieve(url, file_name)
+    # img = PIL_Image.open(file_name)
+
+    img = img.resize([224, 224], PIL_Image.ANTIALIAS)
+    # display(img)
+    img = np.expand_dims(image.img_to_array(img), 0)
+
+    rep = model.predict(img)
+    return rep
 
 
 # for ipython image displaying
@@ -150,19 +150,19 @@ def display_img_from_url(url):
     img = img.resize([224, 224], PIL_Image.ANTIALIAS)
     display(img)
 
-#
-# def get_img(url):
-#     response = requests.get(url, stream=True)
-#     with open("charpragcap/resources/img.jpg", "wb") as out_file:
-#         shutil.copyfileobj(response.raw, out_file)
-#     del response
-#     img = PIL_Image.open("charpragcap/resources/img.jpg")
-#     img = img.resize([224, 224], PIL_Image.ANTIALIAS)
-#     display(img)
-#     rep = np.expand_dims(image.img_to_array(img), 0)
-#
-#     rep = resnet(img_rep_layer).predict(img)
-#     return rep
+
+def get_img(url):
+    response = requests.get(url, stream=True)
+    with open("charpragcap/resources/img.jpg", "wb") as out_file:
+        shutil.copyfileobj(response.raw, out_file)
+    del response
+    img = PIL_Image.open("charpragcap/resources/img.jpg")
+    img = img.resize([224, 224], PIL_Image.ANTIALIAS)
+    display(img)
+    rep = np.expand_dims(image.img_to_array(img), 0)
+
+    rep = resnet(img_rep_layer).predict(img)
+    return rep
 
 
 def item_to_rep(item, id_to_caption):

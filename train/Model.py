@@ -5,7 +5,7 @@ from PIL import Image
 from torch.autograd import Variable
 from torchvision import transforms
 
-from train.image_captioning.char_model import DecoderRNN, EncoderCNN
+from train.encoder_decoder_models import DecoderRNN, EncoderCNN
 from utils.build_vocab import Vocabulary
 from utils.config import *
 from utils.numpy_functions import softmax
