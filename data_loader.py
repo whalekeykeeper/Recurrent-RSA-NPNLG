@@ -279,7 +279,7 @@ class CocoDataset(data.Dataset):
     Custom Coco Dataset for compatibility with torch DataLoader
     """
 
-    def __init__(self, image_dir: str, captions_json: str, vocab, transform=None, data_size=None):
+    def __init__(self, image_dir: str, captions_json: str, vocab, transform=None, data_size=None, ):
         self.image_dir = image_dir
         self.coco = Coco(captions_json, data_size)
         self.vocab = vocab
@@ -314,8 +314,9 @@ class VGDataset(data.Dataset):
     Custom VG Dataset for compatibility with torch DataLoader
     """
 
-    def __init__(self, captions_json_vg: str, vocab, transform=None, data_size=None):
-        self.vg = VG(captions_json_vg, data_size)
+    def __init__(self, captions_json_vg: str, vocab, transform=None, data_size=None, ts1_json: str = None, ts2_json: str = None):
+        self.vg = VG(captions_json_vg, data_size,
+                     ts1_json=ts1_json, ts2_json=ts2_json)
         self.vocab = vocab
         self.transform = transform
 
@@ -371,7 +372,7 @@ def collate_fn(data):
 
 
 def get_loader(image_dir, captions_json, vocab, transform, batch_size, shuffle, num_workers, dataset='coco',
-               data_size=20):
+               data_size=20, ts1_json: str = None, ts2_json: str = None):
     """Returns torch.utils.data.DataLoader for custom coco/vg dataset."""
     if dataset == "coco":
         # COCO caption dataset
@@ -379,7 +380,7 @@ def get_loader(image_dir, captions_json, vocab, transform, batch_size, shuffle, 
                            captions_json=captions_json,
                            vocab=vocab,
                            transform=transform,
-                           data_size=20)
+                           data_size=20, ts1_json=ts1_json, ts2_json=ts2_json)
         # Data loader for COCO dataset
         # This will return (images, captions, lengths) for each iteration.
         # images: a tensor of shape (batch_size, 3, 224, 224).
