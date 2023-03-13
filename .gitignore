@@ -17,6 +17,8 @@ data/models/coco-decoder-5-3000.pkl
 utils/pycocotools_copy_for_this_repo/
 /ann/
 utils/cocoCaption_myVersion/
+data/vg
+data/test_sets
 
 # Ignore pickles
 *.pkl

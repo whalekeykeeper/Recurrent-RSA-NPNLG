@@ -29,7 +29,8 @@ class Model:
         transform = transforms.Compose(
             [
                 transforms.ToTensor(),
-                transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+                transforms.Normalize((0.485, 0.456, 0.406),
+                                     (0.229, 0.224, 0.225)),
             ]
         )
 
@@ -40,7 +41,8 @@ class Model:
         self.encoder = EncoderCNN(embed_size)
         self.encoder.eval()  # evaluation mode (BN uses moving mean/variance)
 
-        self.decoder = DecoderRNN(embed_size, hidden_size, output_size, num_layers)
+        self.decoder = DecoderRNN(
+            embed_size, hidden_size, output_size, num_layers)
 
         # Load the trained model parameters
         self.encoder.load_state_dict(
@@ -82,7 +84,7 @@ class Model:
 
         return log_softmax_array
 
-    def set_features(self, images, rationalities, tf):
+    def set_features(self, images, rationalities, tf, urls_are_local=False):
         self.number_of_images = len(images)
         self.number_of_rationalities = len(rationalities)
         self.rationality_support = rationalities
@@ -93,9 +95,21 @@ class Model:
         else:
             from utils.sample import load_image, load_image_from_path, to_var
 
+            def _load_image(url):
+                try:
+                    if urls_are_local:
+                        return load_image_from_path(url, self.transform)
+                    else:
+                        return load_image(url, self.transform)
+                except Exception as e:
+                    print("[ERROR]", e)
+                    print(url)
+                    return load_image_from_path("data/default.jpg", self.transform)
+
             self.features = [
-                self.encoder(to_var(load_image(url, self.transform))) for url in images
+                self.encoder(to_var(_load_image(url))) for url in images
             ]
+
             self.default_image = self.encoder(
                 to_var(load_image_from_path("data/default.jpg", self.transform))
             )
