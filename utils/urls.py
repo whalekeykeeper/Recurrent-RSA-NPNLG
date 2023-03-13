@@ -16,9 +16,6 @@ url9 = "https://assets.bwbx.io/images/users/iqjWHBFdfxIU/i6bua_ZLxNG0/v1/800x-1.
 
 
 
-
-
-
 img_and_reps = pickle.load(open("charpragcap/resources/img_and_reps",'rb'))
 
 urls = [url1,url2]

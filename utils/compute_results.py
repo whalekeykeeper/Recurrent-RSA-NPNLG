@@ -1,8 +1,8 @@
 import pickle
 
 import numpy as np
-from charpragcap.rsa.cataRSA import CataRSA
-from charpragcap.rsa.cataRSA_working_beam import CataRSA as CataRSA_working_beam
+# from charpragcap.rsa.cataRSA import CataRSA
+# from charpragcap.rsa.cataRSA_working_beam import CataRSA as CataRSA_working_beam
 from config import *
 import generate_clusters
 from image_and_text_utils import (
@@ -12,6 +12,7 @@ from image_and_text_utils import (
     vectorize_caption,
 )
 from urls import reps
+import recursion_schemes.recursion_schemes as CataRSA
 
 id_to_caption = pickle.load(open("charpragcap/resources/id_to_caption", "rb"))
 train, val, test = split_dataset(id_to_caption)
@@ -76,7 +77,7 @@ def compute_results_pragmatic(model, depth, name):
 
         pickle.dump(s0_results, open("charpragcap/resources/s0_results_" + name, "wb"))
 
-
-compute_results_pragmatic(cataRSA, 1, "depth_1")
-compute_results_pragmatic(cataRSA, 2, "depth_2")
-compute_results_pragmatic(cataRSA, 3, "depth_3")
+if __name__ == "__main__":
+    compute_results_pragmatic(cataRSA, 1, "depth_1")
+    compute_results_pragmatic(cataRSA, 2, "depth_2")
+    compute_results_pragmatic(cataRSA, 3, "depth_3")
