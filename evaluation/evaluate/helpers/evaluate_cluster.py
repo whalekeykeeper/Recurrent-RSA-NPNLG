@@ -72,7 +72,7 @@ def evaluate_cluster(cluster: Union[types.TS1_Item, types.TS2_Item]) -> bool:
     )
     captioner = init_captioner(urls)
 
-    pragmatic_caption = ana_greedy(
+    pragmatic_caption = ana_beam(
         captioner,
         target=0,
         depth=1,
@@ -80,8 +80,8 @@ def evaluate_cluster(cluster: Union[types.TS1_Item, types.TS2_Item]) -> bool:
         speaker=0,
         start_from=list(""),
         initial_world_prior=initial_world_prior,
+        beam_width=1
     )
-
     listener_prediction = _get_evaluator_prediction(
         urls, pragmatic_caption[0][0])
 
