@@ -26,3 +26,5 @@ utils/cocoCaptionWithSalanizPycocoevalcap/pycocoevalcap/spice/lib/stanford-coren
 utils/cocoCaptionWithSalanizPycocoevalcap/pycocoevalcap/spice/
 data/train2014/
 data/visual_genome_data/
+data/vg
+data/test_sets
