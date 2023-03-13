@@ -139,7 +139,7 @@ def ana_beam(rsa: RSA, initial_word_prior, depth=0, beam_width=10, target=0, cut
         initial_word_prior,
         listener_rationality=1.0
     )
-    initial_state.timestep = 1
+    initial_state.timestep = 0
     final_sentences = []
     initial_state.context_sentence = ["^"]
 
