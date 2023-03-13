@@ -422,7 +422,7 @@ if __name__ == '__main__':
 
     # # for VG
     captions_json_vg = "./data/visual_genome_JSON/region_descriptions_sample.json"
-    image_dir_vg = "./data/visual_genome_data"
+    image_dir_vg = "../data/visual_genome_data"
     vg = VG(captions_json_vg)
     print(vg.captions['1_4091'])
     # print(vg.box)

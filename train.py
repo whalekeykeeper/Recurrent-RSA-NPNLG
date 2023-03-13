@@ -2,8 +2,8 @@ import torch
 import torch.nn as nn
 import numpy as np
 import os
-from data_loader import get_loader, Vocabulary
-from encoder_decoder_models import EncoderCNN, DecoderRNN
+from train.data_loader import get_loader, Vocabulary
+from train.encoder_decoder_models import EncoderCNN, DecoderRNN
 from torch.nn.utils.rnn import pack_padded_sequence
 from torchvision import transforms
 
