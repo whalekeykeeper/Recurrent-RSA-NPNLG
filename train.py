@@ -11,6 +11,8 @@ from torchvision import transforms
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 COCO_CAPTIONS_JSON = "./data/captions_train2014.json"
 VG_CAPTIONS_JSON = "./data/visual_genome_JSON/region_descriptions.json"
+TS1_JSON = "./data/test_sets/ts1/ts1.json"
+TS2_JSON = "./data/test_sets/ts2/ts2.json"
 IMAGE_DIR = "./data/train2014"
 MODEL_OUTPUT = "./output"   # Save models
 
@@ -53,7 +55,8 @@ if __name__ == '__main__':
 
     # TRAIN WITH VG
     # Load vocabulary wrapper
-    vocab = Vocabulary(VG_CAPTIONS_JSON, level='char', dataset='vg', data_size=VOCAB_SIZE)  # level='word
+    vocab = Vocabulary(VG_CAPTIONS_JSON, level='char',
+                       dataset='vg', data_size=VOCAB_SIZE)  # level='word
     # Build data loader
     data_loader = get_loader(IMAGE_DIR, VG_CAPTIONS_JSON, vocab,
                              transform, batch_size=BATCH_SIZE,
@@ -70,7 +73,8 @@ if __name__ == '__main__':
 
     # Loss and optimizer
     criterion = nn.CrossEntropyLoss()
-    params = list(decoder.parameters()) + list(encoder.linear.parameters()) + list(encoder.bn.parameters())
+    params = list(decoder.parameters()) + \
+        list(encoder.linear.parameters()) + list(encoder.bn.parameters())
     optimizer = torch.optim.Adam(params, lr=LEARNING_RATE)
 
     # Train the models
@@ -81,7 +85,8 @@ if __name__ == '__main__':
             # Set mini-batch dataset
             images = images.to(device)
             captions = captions.to(device)
-            targets = pack_padded_sequence(captions, lengths, batch_first=True)[0]
+            targets = pack_padded_sequence(
+                captions, lengths, batch_first=True)[0]
 
             # Forward, backward and optimize
             features = encoder(images)
@@ -100,5 +105,3 @@ if __name__ == '__main__':
     # Save the model
     torch.save(decoder.state_dict(), os.path.join("./output", 'decoder.ckpt'))
     torch.save(encoder.state_dict(), os.path.join("./output", 'encoder.ckpt'))
-
-

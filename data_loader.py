@@ -6,15 +6,20 @@ import nltk as nltk
 import torch
 import torch.utils.data as data
 from PIL import Image
+from typing import List, MutableSet
+from evaluation.build_test_sets import types as ts_types
+import os
 
 
 class VG:
-    def __init__(self, vg_json: str, data_size=None):
+    def __init__(self, vg_json: str, data_size=None, ts1_json=None, ts2_json=None):
         self.ids = []  # [  img_id + "_" + region_id  ]
         self.captions = {}  # { id: annotation }
         self.box = {}  # { id: list of four ints}
         self.size = data_size
         self._read_captions(vg_json)
+        self._reserved_image_ids = self._get_reserved_image_ids(
+            ts1_json, ts2_json)
 
         if data_size is not None:
             self.ids = self.ids[:data_size]
@@ -27,21 +32,57 @@ class VG:
                 cropped_boxes[id] = self.box[id]
             self.box = cropped_boxes
 
+    def _get_reserved_image_ids(self, ts1_json: str, ts2_json: str) -> List[str]:
+        """
+        If TS1 and TS2 have been generated, this function
+        returns a list of image ids that were used in 
+        either test set.
+        """
+        ts1: ts_types.TS1 = None
+        ts2: ts_types.TS2 = None
+        if os.path.exists(ts1_json):
+            with open(ts1_json, "r") as f:
+                ts1 = json.loads(f.read())
+        if os.path.exists(ts2_json):
+            with open(ts2_json, "r") as f:
+                ts2 = json.loads(f.read())
+
+        reserved_ids: MutableSet[int] = set()
+
+        if ts1:
+            for cluster in ts1:
+                reserved_ids.add(cluster["target"]["original_image_id"])
+                reserved_ids.update(item["original_image_id"]
+                                    for item in cluster["distractors"])
+        if ts2:
+            for cluster in ts2:
+                reserved_ids.add(cluster["target"]["original_image_id"])
+                reserved_ids.update(item["original_image_id"]
+                                    for item in cluster["distractors"])
+
+        return [str(image_id) for image_id in reserved_ids]
+
     def _read_captions(self, vg_json: str):
         with open(vg_json, "r") as f:
             data = json.loads(f.read())
             for i, image in enumerate(data):
                 for s in image["regions"]:
                     img_id = str(s["image_id"])
+
+                    # If this image is used either in TS1 or TS2, skip it.
+                    if img_id in self._reserved_image_ids:
+                        continue
+
                     region_id = str(s["region_id"])
                     x_coordinate = s["x"]
                     y_coordinate = s["y"]
                     height = s["height"]
                     width = s["width"]
                     self.ids.append(img_id + "_" + region_id)
-                    self.captions[img_id + "_" + region_id] = s["phrase"].lower()
+                    self.captions[img_id + "_" +
+                                  region_id] = s["phrase"].lower()
                     one_box = self._edit_region(height, width, x_coordinate,
-                                            y_coordinate)
+                                                y_coordinate)
                     self.box[img_id + "_" + region_id] = one_box
 
     def _edit_region(self, height: int, width: int, x_coordinate: int, y_coordinate: int) -> list[int] | list[int |
@@ -60,7 +101,8 @@ class VG:
                     x_coordinate,
                     y_coordinate + (height / 2) - (width / 2),
                     x_coordinate + max(width, height),
-                    y_coordinate + (height / 2) - (width / 2) + max(width, height),
+                    y_coordinate + (height / 2) - (width / 2) +
+                    max(width, height),
                 ]
         else:
             # check if image recentering causes box to go off the image to the left
@@ -75,7 +117,8 @@ class VG:
                 box = [
                     x_coordinate + (width / 2) - (height / 2),
                     y_coordinate,
-                    x_coordinate + (width / 2) - (height / 2) + max(width, height),
+                    x_coordinate + (width / 2) - (height / 2) +
+                    max(width, height),
                     y_coordinate + max(width, height),
                 ]
         return box
@@ -161,7 +204,8 @@ class Coco:
 class Vocabulary:
     def __init__(self, captions_json: str, level: str, data_size=None, dataset="coco"):
         if dataset not in ["coco", "vg"]:
-            raise Exception("Dataset not found. Make sure it is either 'coco' or 'vg'")
+            raise Exception(
+                "Dataset not found. Make sure it is either 'coco' or 'vg'")
 
         self.word2idx = {}
         self.idx2word = {}
@@ -170,7 +214,7 @@ class Vocabulary:
         self.dataset = dataset
         self.build_vocab(captions_json, level)
 
-    def _build_vocab_vg(self, captions_json: str, level: str) -> [str]:
+    def _build_vocab_vg(self, captions_json: str, level: str) -> List[str]:
         vg = VG(captions_json, self.data_size)
         counter = Counter()
         for i, id in enumerate(vg.ids):
@@ -186,7 +230,7 @@ class Vocabulary:
             chars.sort()
             return chars
 
-    def _build_vocab_coco(self, captions_json: str, level: str) -> [str]:
+    def _build_vocab_coco(self, captions_json: str, level: str) -> List[str]:
         coco = Coco(captions_json, self.data_size)
         counter = Counter()
         for i, id in enumerate(coco.ids):
@@ -248,7 +292,8 @@ class CocoDataset(data.Dataset):
         image_file = self.coco.get_image(coco_id)
 
         # load and preprocess image
-        image = Image.open(os.path.join(self.image_dir, image_file)).convert("RGB")
+        image = Image.open(os.path.join(
+            self.image_dir, image_file)).convert("RGB")
         if self.transform is not None:
             image = self.transform(image)
 
@@ -268,6 +313,7 @@ class VGDataset(data.Dataset):
     """
     Custom VG Dataset for compatibility with torch DataLoader
     """
+
     def __init__(self, captions_json_vg: str, vocab, transform=None, data_size=None):
         self.vg = VG(captions_json_vg, data_size)
         self.vocab = vocab
@@ -292,6 +338,7 @@ class VGDataset(data.Dataset):
 
     def __len__(self):
         return len(self.vg)
+
 
 def collate_fn(data):
     """Creates mini-batch tensors from the list of tuples (image, caption).
@@ -344,7 +391,8 @@ def get_loader(image_dir, captions_json, vocab, transform, batch_size, shuffle, 
                                                   num_workers=num_workers,
                                                   collate_fn=collate_fn)
     else:
-        vg = VGDataset(captions_json_vg=captions_json, vocab=vocab, transform=transform, data_size=20)
+        vg = VGDataset(captions_json_vg=captions_json,
+                       vocab=vocab, transform=transform, data_size=20)
         # Data loader for VG dataset
         # This will return (images, captions, lengths) for each iteration.
         # images: a tensor of shape (batch_size, 3, 224, 224).
