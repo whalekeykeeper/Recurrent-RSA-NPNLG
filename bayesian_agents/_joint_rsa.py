@@ -207,9 +207,8 @@ class RSA:
                         )
                     else:
                         new_listener_prior = self._init_prior()  # does not matter
-                    partial_caption.append(char)
                     queue.append(
-                        (i, [*partial_caption], [*sentence_prob], new_listener_prior))
+                        (i, [*partial_caption, char], [*sentence_prob], new_listener_prior))
             itercount += 1
 
         sorted_sentences = sorted(
