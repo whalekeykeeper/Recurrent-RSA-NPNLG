@@ -5,7 +5,16 @@ from bayesian_agents._joint_rsa import SamplingStrategy, SpeakerType
 import numpy as np
 
 
-def evaluate_cluster(cluster: Union[types.TS1_Item, types.TS2_Item]) -> bool:
+def evaluate_cluster(
+    cluster: Union[types.TS1_Item, types.TS2_Item],
+    strategy: SamplingStrategy = SamplingStrategy.GREEDY,
+    speaker_type: SpeakerType = SpeakerType.PRAGMATIC,
+    speaker_rationality: int = 5,
+    n_beams: int = 10,
+    cut_rate: float = 1,
+    max_sentence_length: int = 60,
+    max_sentences: int = 50,
+) -> bool:
     urls = [
         cluster["target"]["local_path"],
         *[item["local_path"] for item in cluster["distractors"]]
@@ -15,22 +24,20 @@ def evaluate_cluster(cluster: Union[types.TS1_Item, types.TS2_Item]) -> bool:
     evaluator = init_evaluator(urls)
 
     pragmatic_caption = captioner.sample(
-        strategy=SamplingStrategy.BEAM,
-        speaker_type=SpeakerType.PRAGMATIC,
-        speaker_rationality=5,
-        n_beams=10,
-        cut_rate=1,
-        max_sentence_length=60,
-        max_sentences=50,
+        strategy=strategy,
+        speaker_type=speaker_type,
+        speaker_rationality=speaker_rationality,
+        n_beams=n_beams,
+        cut_rate=cut_rate,
+        max_sentence_length=max_sentence_length,
+        max_sentences=max_sentences,
         target_image_idx=0
     )
 
-    print("Pragmatic caption:\n", pragmatic_caption)
     evaluator_posterior = evaluator.compute_posterior(
         caption=pragmatic_caption[0])
 
     evaluator_prediction = np.argmax(evaluator_posterior)
-    print("evaluator prediction", evaluator_prediction)
 
     if evaluator_prediction == 0:
         return True
