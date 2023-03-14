@@ -122,9 +122,15 @@ def _get_region_clusters(regions: Regions = None, n_cluster_items: int = 10, n_c
         print(f"Building TS2 cluster {i + 1}/{n_initial_centers}...")
         flattened_regions.sort(key=_acceptable_next_cluster_item(
             cluster, exhausted_ids), reverse=True)
-        for item in flattened_regions[:n_cluster_items]:
-            cluster.append(item)
-            exhausted_ids.add(item[1]["region_id"])
+        while len(cluster) < n_cluster_items:
+            # Populate cluster, prevent
+            # regions from the same image in the same cluster
+            for item in flattened_regions:
+                image_id, region = item
+                if image_id not in [item[0] for item in cluster]:
+                    cluster.append(item)
+                    exhausted_ids.add(region["region_id"])
+                    break
 
     clusters.sort(key=lambda cluster: avg_word_overlap(cluster), reverse=True)
 
