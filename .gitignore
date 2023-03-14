@@ -26,3 +26,4 @@ data/test_sets
 utils/cocoCaptionWithSalanizPycocoevalcap/pycocoevalcap/tokenizer/stanford-corenlp-3.4.1.jar
 utils/cocoCaptionWithSalanizPycocoevalcap/pycocoevalcap/spice/lib/stanford-corenlp-3.6.0-models.jar
 utils/cocoCaptionWithSalanizPycocoevalcap/pycocoevalcap/spice/
+data/models
