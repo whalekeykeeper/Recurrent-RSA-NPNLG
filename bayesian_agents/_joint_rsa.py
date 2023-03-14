@@ -19,7 +19,7 @@ class SpeakerType(Enum):
 
 
 class RSA:
-    def __init__(self, images: List[str] = []) -> None:
+    def __init__(self, images: List[str] = [], urls_are_local=False) -> None:
         self.idx2seg = index_to_char
         self.seg2idx = char_to_index
         self.n_images = len(images)
@@ -29,7 +29,7 @@ class RSA:
         self.neural_model = Model(
             path="coco", dictionaries=(self.seg2idx, self.idx2seg))
         self.neural_model.set_features(
-            images=images, rationalities=[100.0], tf=False)
+            images=images, rationalities=[100.0], tf=False, urls_are_local=urls_are_local)
 
         self._literal_speaker_cache = {}
 
