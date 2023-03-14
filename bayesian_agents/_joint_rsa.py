@@ -31,19 +31,31 @@ class RSA:
         self.neural_model.set_features(
             images=images, rationalities=[100.0], tf=False)
 
+        self._literal_speaker_cache = {}
+
     def _init_prior(self):
         # start with every image having equal prior
         return np.full((self.n_images, ), 1 / self.n_images)
+
+    def _clear_cache(self):
+        self._literal_speaker_cache = {}
 
     def _literal_speaker(
         self,
         partial_caption: List[str] = None,
         target_image_idx: int = None
     ) -> np.ndarray:
+        # simple caching logic
+        hashable = (tuple(partial_caption), target_image_idx)
+        if hashable in self._literal_speaker_cache:
+            return self._literal_speaker_cache[hashable]
 
         world = RSA_World(target=target_image_idx)
         state = RSA_State(context_sentence=partial_caption)
-        return self.neural_model.forward(world, state)
+        out = self.neural_model.forward(world, state)
+
+        self._literal_speaker_cache[hashable] = out
+        return out
 
     def _literal_listener(
         self,
@@ -217,14 +229,14 @@ class RSA:
                max_sentence_length: int = 60
                ):
         if strategy == SamplingStrategy.GREEDY:
-            return self._sample_greedy(
+            sampled = self._sample_greedy(
                 speaker_rationality=speaker_rationality,
                 target_image_idx=target_image_idx,
                 speaker_type=speaker_type,
                 max_sentence_length=max_sentence_length,
             )
         elif strategy == SamplingStrategy.BEAM:
-            return self._sample_beam(
+            sampled = self._sample_beam(
                 cut_rate=cut_rate,
                 max_sentence_length=max_sentences,
                 max_sentences=max_sentences,
@@ -233,6 +245,44 @@ class RSA:
                 speaker_type=speaker_type,
                 target_image_idx=target_image_idx,
             )
+        self._clear_cache()
+        return sampled
 
     def compute_posterior(self, caption: str):
-        pass
+        caption = list(caption.replace("^", ""))
+        probs = [[] for _ in range(self.n_images)]
+        for target_image_idx in range(self.n_images):
+            listener_prior = self._init_prior()
+            progress = ["^"]
+            for char in caption:
+                seg = self.seg2idx[char]
+                speaker_posterior = self._pragmatic_speaker(
+                    listener_prior=listener_prior,
+                    partial_caption=progress,
+                    target_image_idx=target_image_idx,
+                )
+                probs[target_image_idx].append(speaker_posterior[seg])
+                listener_prior = self._literal_listener(
+                    prior=listener_prior,
+                    partial_caption=progress,
+                    utterance=seg
+                )
+                progress.append(char)
+        self._clear_cache()
+        return np.sum(np.asarray(probs), axis=1)
+
+    def compute_posterior_v2(self, caption: str):
+        caption = list(caption.replace("^", ""))
+        probs = []
+        for target_image_idx in range(self.n_images):
+            partial_caption = caption[:-1]
+            char = caption[-1]
+            utterance = self.seg2idx[char]
+            probs[target_image_idx] = self._literal_listener(
+                partial_caption=partial_caption,
+                prior=self._init_prior(),
+                utterance=utterance,
+                target_image_idx=target_image_idx,
+            )
+
+        return np.sum(np.asarray(probs), axis=1)
