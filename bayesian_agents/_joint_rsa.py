@@ -19,7 +19,7 @@ class SpeakerType(Enum):
 
 
 class RSA:
-    def __init__(self, images: List[str] = [], urls_are_local=False) -> None:
+    def __init__(self, images: List[str] = [], urls_are_local=False, model: str = "coco") -> None:
         self.idx2seg = index_to_char
         self.seg2idx = char_to_index
         self.n_images = len(images)
@@ -27,7 +27,7 @@ class RSA:
         self._speaker_rationality = 0.0
 
         self.neural_model = Model(
-            path="coco", dictionaries=(self.seg2idx, self.idx2seg))
+            path=model, dictionaries=(self.seg2idx, self.idx2seg))
         self.neural_model.set_features(
             images=images, rationalities=[100.0], tf=False, urls_are_local=urls_are_local)
 
@@ -248,7 +248,8 @@ class RSA:
         self._clear_cache()
         return sampled
 
-    def compute_posterior(self, caption: str):
+    def compute_posterior(self, caption: str, speaker_rationality: float = 5.0):
+        self._speaker_rationality = speaker_rationality
         caption = list(caption.replace("^", ""))
         probs = [[] for _ in range(self.n_images)]
         for target_image_idx in range(self.n_images):
