@@ -17,5 +17,5 @@ def evaluate():
     del regions
     del objects
 
-    evaluate_ts1(ts1)
     evaluate_ts2(ts2)
+    evaluate_ts1(ts1)
