@@ -18,31 +18,27 @@ data_dir = "data/test_sets/ts1/man/3"
 for ip in os.listdir(data_dir):
     urls.append(os.path.join(data_dir, ip))
 
-print(urls)
 
 # the model starts of assuming it's equally likely any image is the intended referent
 model = RSA(images=urls, urls_are_local=True)
 
 GREEDY_caption = model.sample(
     strategy=SamplingStrategy.GREEDY,
-    speaker_type=SpeakerType.LITERAL,
-    target_image_idx=0,
-    speaker_rationality=5
-)
-
-BEAM_caption = model.sample(
-    strategy=SamplingStrategy.BEAM,
     speaker_type=SpeakerType.PRAGMATIC,
-    target_image_idx=0,
+    target_image_idx=5,
     speaker_rationality=5,
     n_beams=10,
     cut_rate=1
 )
 
-print("GREEDY caption:\n", GREEDY_caption)
-print("BEAM caption:\n", BEAM_caption)
+BEAM_caption = model.sample(
+    strategy=SamplingStrategy.BEAM,
+    speaker_type=SpeakerType.PRAGMATIC,
+    target_image_idx=5,
+    speaker_rationality=5,
+    n_beams=10,
+    cut_rate=1
+)
 
-print("------")
-print(model.compute_posterior(GREEDY_caption[0]))
-print("------")
-print(model.compute_posterior(BEAM_caption[0]))
+print("GREEDY caption:\n", GREEDY_caption, len(GREEDY_caption[0]))
+print("BEAM caption:\n", BEAM_caption, len(BEAM_caption[0]))
