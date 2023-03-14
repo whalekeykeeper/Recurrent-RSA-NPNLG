@@ -108,15 +108,9 @@ class RSA:
         self._speaker_rationality = speaker_rationality
 
         probs = []
-        next_listener_prior = None
+        listener_prior = self._init_prior()
 
         while len(partial_caption) < max_sentence_length:
-            prev_listener_posterior = None
-            if next_listener_prior is not None:
-                prev_listener_posterior = next_listener_prior
-            else:
-                prev_listener_posterior = self._init_prior()
-
             if speaker_type == SpeakerType.LITERAL:
                 speaker_posterior = self._literal_speaker(
                     partial_caption=partial_caption,
@@ -126,19 +120,18 @@ class RSA:
                 speaker_posterior = self._pragmatic_speaker(
                     partial_caption=partial_caption,
                     target_image_idx=target_image_idx,
-                    listener_prior=prev_listener_posterior,
+                    listener_prior=listener_prior,
                 )
             segment = np.argmax(speaker_posterior)
             p = speaker_posterior[segment]
             probs.append(p)
 
             if speaker_type == SpeakerType.PRAGMATIC:
-                prev_listener_posterior = self._literal_listener(
-                    prior=prev_listener_posterior,
+                listener_prior = self._literal_listener(
+                    prior=listener_prior,
                     partial_caption=partial_caption,
                     utterance=segment
                 )
-                next_listener_prior = prev_listener_posterior
             partial_caption.append(self.idx2seg[segment])
             if self.idx2seg[segment] == "$":
                 break
@@ -156,6 +149,7 @@ class RSA:
         cut_rate: int = 1,
         max_sentences: int = 50,
     ) -> Tuple[str, float]:
+
         self._speaker_rationality = speaker_rationality
         initial_caption = ["^"]
         queue: List[Tuple[int, List[str], List[float], np.ndarray]] = []
@@ -172,11 +166,18 @@ class RSA:
             if itercount % (n_beams * cut_rate) == 0:
                 # After processing cut_rate timesteps for all beams, we cut the queue
                 # and keep only the best sentences
-                q = sorted(queue, key=lambda x: np.sum(x[2]), reverse=True)
+                q = sorted(queue, key=lambda x: np.sum(
+                    np.asarray(x[2])), reverse=True)
                 queue = q[:n_beams]
 
             beam_id, partial_caption, sentence_prob, listener_prior = queue.pop(
                 0)
+
+            if len(partial_caption) == max_sentence_length:
+                final_sentences.append(
+                    ("".join(partial_caption), np.sum(np.asarray(sentence_prob))))
+                continue
+
             if speaker_type == SpeakerType.LITERAL:
                 speaker_posterior = self._literal_speaker(
                     partial_caption=partial_caption,
@@ -188,18 +189,14 @@ class RSA:
                     target_image_idx=target_image_idx,
                     listener_prior=listener_prior,
                 )
-            segment = np.flip(np.argsort(speaker_posterior))[
-                :n_beams][beam_id]
-
+            segment = np.flip(np.argsort(speaker_posterior))[beam_id]
             sentence_prob.append(speaker_posterior[segment])
             char = self.idx2seg[segment]
-            partial_caption.append(char)
+
             if char == "$":
+                partial_caption.append(char)
                 final_sentences.append(
-                    ("".join(partial_caption), np.sum(sentence_prob)))
-            elif len(partial_caption) == max_sentence_length:
-                final_sentences.append(
-                    ("".join(partial_caption), np.sum(sentence_prob)))
+                    ("".join(partial_caption), np.sum(np.asarray(sentence_prob))))
             else:
                 for i in range(n_beams):
                     if speaker_type == SpeakerType.PRAGMATIC:
@@ -210,6 +207,7 @@ class RSA:
                         )
                     else:
                         new_listener_prior = self._init_prior()  # does not matter
+                    partial_caption.append(char)
                     queue.append(
                         (i, [*partial_caption], [*sentence_prob], new_listener_prior))
             itercount += 1
@@ -238,7 +236,7 @@ class RSA:
         elif strategy == SamplingStrategy.BEAM:
             sampled = self._sample_beam(
                 cut_rate=cut_rate,
-                max_sentence_length=max_sentences,
+                max_sentence_length=max_sentence_length,
                 max_sentences=max_sentences,
                 n_beams=n_beams,
                 speaker_rationality=speaker_rationality,
