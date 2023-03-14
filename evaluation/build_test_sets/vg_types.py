@@ -98,6 +98,7 @@ TS2_Raw_Clusters = List[TS2_Raw_Cluster]
 class TS2_Item (TypedDict):
     target: ImageDef
     distractors: List[ImageDef]
+    cluster_id: int
 
 
 TS1 = List[TS1_Item]
