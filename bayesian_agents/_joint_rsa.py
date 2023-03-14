@@ -248,42 +248,19 @@ class RSA:
         self._clear_cache()
         return sampled
 
-    def compute_posterior(self, caption: str, speaker_rationality: float = 5.0):
-        self._speaker_rationality = speaker_rationality
+    def compute_posterior(self, caption: str):
         caption = list(caption.replace("^", ""))
-        probs = [[] for _ in range(self.n_images)]
-        for target_image_idx in range(self.n_images):
-            listener_prior = self._init_prior()
-            progress = ["^"]
-            for char in caption:
-                seg = self.seg2idx[char]
-                speaker_posterior = self._pragmatic_speaker(
-                    listener_prior=listener_prior,
-                    partial_caption=progress,
-                    target_image_idx=target_image_idx,
-                )
-                probs[target_image_idx].append(speaker_posterior[seg])
-                listener_prior = self._literal_listener(
-                    prior=listener_prior,
-                    partial_caption=progress,
-                    utterance=seg
-                )
-                progress.append(char)
-        self._clear_cache()
-        return np.sum(np.asarray(probs), axis=1)
-
-    def compute_posterior_v2(self, caption: str):
-        caption = list(caption.replace("^", ""))
-        probs = []
-        for target_image_idx in range(self.n_images):
-            partial_caption = caption[:-1]
-            char = caption[-1]
-            utterance = self.seg2idx[char]
-            probs[target_image_idx] = self._literal_listener(
-                partial_caption=partial_caption,
-                prior=self._init_prior(),
-                utterance=utterance,
-                target_image_idx=target_image_idx,
+        listener_prior = self._init_prior()
+        listener_posterior = None
+        progress = ["^"]
+        for char in caption:
+            seg = self.seg2idx[char]
+            listener_posterior = self._literal_listener(
+                prior=listener_prior,
+                partial_caption=progress,
+                utterance=seg
             )
-
-        return np.sum(np.asarray(probs), axis=1)
+            listener_prior = listener_posterior
+            progress.append(char)
+        self._clear_cache()
+        return listener_posterior
