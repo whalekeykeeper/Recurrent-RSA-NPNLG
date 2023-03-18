@@ -18,7 +18,7 @@ def evaluate():
     del regions
     del objects
 
-    strategy = SamplingStrategy.BEAM
+    strategy = SamplingStrategy.GREEDY
     speaker_type = SpeakerType.PRAGMATIC
     n_beams = 10
     speaker_rationality = 5
