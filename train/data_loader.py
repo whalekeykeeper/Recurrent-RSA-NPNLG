@@ -1,5 +1,4 @@
 import json
-import os
 from collections import Counter
 
 import nltk as nltk
@@ -12,6 +11,9 @@ import os
 
 
 class VG:
+    """
+    To create a VG class object.
+    """
     def __init__(self, vg_json: str, data_size=None, ts1_json=None, ts2_json=None):
         self.ids = []  # [  img_id + "_" + region_id  ]
         self.captions = {}  # { id: annotation }
@@ -67,13 +69,13 @@ class VG:
             data = json.loads(f.read())
             for i, image in enumerate(data):
                 for s in image["regions"]:
-                    img_id = str(s["image_id"])
+                    img_id = str(s["image"])
 
                     # If this image is used either in TS1 or TS2, skip it.
                     if img_id in self._reserved_image_ids:
                         continue
 
-                    region_id = str(s["region_id"])
+                    region_id = str(s["id"])
                     x_coordinate = s["x"]
                     y_coordinate = s["y"]
                     height = s["height"]
@@ -170,6 +172,9 @@ class VG:
 
 
 class Coco:
+    """
+        To create a COCO class object.
+        """
     def __init__(self, coco_json: str, data_size=None):
         self.ids = []
         self.captions = {}  # { id: annotation }
@@ -202,6 +207,9 @@ class Coco:
 
 
 class Vocabulary:
+    """
+    To create a class object for vocabulary.
+    """
     def __init__(self, captions_json: str, level: str, data_size=None, dataset="coco"):
         if dataset not in ["coco", "vg"]:
             raise Exception(
@@ -373,14 +381,16 @@ def collate_fn(data):
 
 def get_loader(image_dir, captions_json, vocab, transform, batch_size, shuffle, num_workers, dataset='coco',
                data_size=20, ts1_json: str = None, ts2_json: str = None):
-    """Returns torch.utils.data.DataLoader for custom coco/vg dataset."""
+    """
+    Returns torch.utils.data.DataLoader for custom coco/vg dataset.
+    """
     if dataset == "coco":
         # COCO caption dataset
         coco = CocoDataset(image_dir=image_dir,
                            captions_json=captions_json,
                            vocab=vocab,
                            transform=transform,
-                           data_size=20, ts1_json=ts1_json, ts2_json=ts2_json)
+                           data_size=20)
         # Data loader for COCO dataset
         # This will return (images, captions, lengths) for each iteration.
         # images: a tensor of shape (batch_size, 3, 224, 224).
@@ -393,7 +403,7 @@ def get_loader(image_dir, captions_json, vocab, transform, batch_size, shuffle, 
                                                   collate_fn=collate_fn)
     else:
         vg = VGDataset(captions_json_vg=captions_json,
-                       vocab=vocab, transform=transform, data_size=20)
+                       vocab=vocab, transform=transform, data_size=20, ts1_json=ts1_json, ts2_json=ts2_json)
         # Data loader for VG dataset
         # This will return (images, captions, lengths) for each iteration.
         # images: a tensor of shape (batch_size, 3, 224, 224).
@@ -414,20 +424,16 @@ if __name__ == '__main__':
     # # for COCO
     # captions_json = "./data/captions_train2014.json"
     # image_dir_coco = "./data/train2014"
-    # vocab = Vocabulary(captions_json, level='word')
+    # vocab = Vocabulary(captions_json, level='char')
     # dataset = CocoDataset(image_dir_coco, captions_json, vocab)
     # print(dataset[0])
     # data_loader = get_loader(image_dir_coco, captions_json, vocab, None, 128, shuffle=True, num_workers=1)
     # print(data_loader)
 
     # # for VG
-    captions_json_vg = "./data/visual_genome_JSON/region_descriptions_sample.json"
+    captions_json_vg = "./data/visual_genome_JSON/region_descriptions.json"
     image_dir_vg = "../data/visual_genome_data"
     vg = VG(captions_json_vg)
-    print(vg.captions['1_4091'])
-    # print(vg.box)
-    # vg.get_image('1_1382')
-    vg.get_reesized_image('1_1382')
     vocab = Vocabulary(captions_json_vg, level='char', dataset='vg')
     dataset = VGDataset(captions_json_vg, vocab)
     print(dataset[0])
