@@ -14,7 +14,11 @@ For our project, we would suggest downloading `2014 Train images` and/or `2014 V
 For our project, we would suggest downloading the `version 1.0` of dataset. It is also what we used for evaluation.
 
 ##  Training
-To train character-level models, use `train.py`. Demonstration code were included in this script. 
+To train character-level models, use `train.py`. Demonstration code were included in this script.
+
+You can choose to train with either MSCOCO or the VG dataset.
+
+##  
 
 ## Evaluating
 To run the evaluation, simply run `ev.py`.
