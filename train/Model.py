@@ -1,8 +1,5 @@
 import numpy as np
 import torch
-import torch.nn as nn
-from PIL import Image
-from torch.autograd import Variable
 from torchvision import transforms
 
 from train.encoder_decoder_models import DecoderRNN, EncoderCNN
@@ -19,7 +16,6 @@ class Model:
         self.encoder_path = TRAINED_MODEL_PATH + path + "-encoder-5-3000.pkl"
         self.decoder_path = TRAINED_MODEL_PATH + path + "-decoder-5-3000.pkl"
 
-        # todo: change
         embed_size = 256
         hidden_size = 512
         num_layers = 1

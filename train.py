@@ -46,23 +46,22 @@ if __name__ == '__main__':
 
     # # TRAIN WITH COCO
     # # Load vocabulary wrapper
-    # vocab = Vocabulary(COCO_CAPTIONS_JSON, level='char', dataset='coco', data_size=VOCAB_SIZE) # level='word
+    # vocab = Vocabulary(COCO_CAPTIONS_JSON, level='char', dataset='coco', data_size=VOCAB_SIZE)
     # # Build data loader
     # data_loader = get_loader(IMAGE_DIR, COCO_CAPTIONS_JSON, vocab,
     #                          transform, batch_size=BATCH_SIZE,
-    #                          shuffle=True, num_workers=NUM_WORKERS, data_size=VOCAB_SIZE, dataset='coco'
-    #                          ts1_json=TS1_JSON, ts2_json=TS2_JSON
-    #                          )
+    #                          shuffle=True, num_workers=NUM_WORKERS, data_size=VOCAB_SIZE, dataset='coco')
     # print(f"LENGTH {len(data_loader)}")
 
     # TRAIN WITH VG
     # Load vocabulary wrapper
     vocab = Vocabulary(VG_CAPTIONS_JSON, level='char',
-                       dataset='vg', data_size=VOCAB_SIZE)  # level='word
+                       dataset='vg', data_size=VOCAB_SIZE)
     # Build data loader
     data_loader = get_loader(IMAGE_DIR, VG_CAPTIONS_JSON, vocab,
                              transform, batch_size=BATCH_SIZE,
-                             shuffle=True, num_workers=NUM_WORKERS, data_size=VOCAB_SIZE, dataset='vg', ts1_json=TS1_JSON, ts2_json=TS2_JSON)
+                             shuffle=True, num_workers=NUM_WORKERS, data_size=VOCAB_SIZE, dataset='vg',
+                             ts1_json=TS1_JSON, ts2_json=TS2_JSON)
 
     print(f"LENGTH {len(data_loader)}")
 
