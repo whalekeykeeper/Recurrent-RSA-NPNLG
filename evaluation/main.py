@@ -3,25 +3,24 @@ from .build_test_sets import (build_ts1, build_ts2, download_vg_assets,
 
 from .evaluate import evaluate_ts1, evaluate_ts2
 from bayesian_agents._joint_rsa import SpeakerType, SamplingStrategy
+import json
+from .build_test_sets.vg_types import TS1, TS2
 
 
 def evaluate():
-    download_vg_assets()
-    metadata, regions, objects = load_vg_dataset()
-    ts1 = build_ts1(objects=objects, regions=regions, metadata=metadata)
-    ts2 = build_ts2(regions=regions, metadata=metadata)
-
-    #  Delete unnecessary data to free up almost 4 gigs memory
-    #  System might run out of ram if models are loaded before
-    #  garbage collection
-    del metadata
-    del regions
-    del objects
-
     strategy = SamplingStrategy.GREEDY
     speaker_type = SpeakerType.PRAGMATIC
     n_beams = 10
     speaker_rationality = 5
+
+    ts1_path = "data/test_sets/ts1/ts1.json"
+    ts2_path = "data/test_sets/ts2/ts2.json"
+
+    with open(ts1_path, "r", encoding="utf-8") as f:
+        ts1: TS1 = json.load(f)
+
+    with open(ts2_path, "r", encoding="utf-8") as f:
+        ts2: TS2 = json.load(f)
 
     print(
         "Starting evalation with parameters:",
