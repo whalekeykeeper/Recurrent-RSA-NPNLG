@@ -13,11 +13,6 @@ data/models/COCO/google-cloud-sdk/
 data/images/
 data/models/coco-decoder-5-3000.pkl
 data/models/lang_mod-decoder-5-3000.pkl
-data/models/coco-decoder-5-3000.pkl
-utils/pycocotools_copy_for_this_repo/
-/ann/
-utils/cocoCaption_myVersion/
-data/vg
 data/test_sets
 
 # Ignore pickles
@@ -26,4 +21,8 @@ data/test_sets
 utils/cocoCaptionWithSalanizPycocoevalcap/pycocoevalcap/tokenizer/stanford-corenlp-3.4.1.jar
 utils/cocoCaptionWithSalanizPycocoevalcap/pycocoevalcap/spice/lib/stanford-corenlp-3.6.0-models.jar
 utils/cocoCaptionWithSalanizPycocoevalcap/pycocoevalcap/spice/
+data/test_sets
+data/vg
 data/models
+data/train2014/
+data/visual_genome_data/
