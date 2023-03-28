@@ -13,10 +13,7 @@ data/models/COCO/google-cloud-sdk/
 data/images/
 data/models/coco-decoder-5-3000.pkl
 data/models/lang_mod-decoder-5-3000.pkl
-data/models/coco-decoder-5-3000.pkl
-utils/pycocotools_copy_for_this_repo/
-/ann/
-utils/cocoCaption_myVersion/
+data/test_sets
 
 # Ignore pickles
 *.pkl
@@ -27,3 +24,5 @@ utils/cocoCaptionWithSalanizPycocoevalcap/pycocoevalcap/spice/
 data/test_sets
 data/vg
 data/models
+data/train2014/
+data/visual_genome_data/

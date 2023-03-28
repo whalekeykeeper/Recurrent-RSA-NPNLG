@@ -9,6 +9,7 @@ from tqdm import tqdm
 
 from bayesian_agents.rsaState import RSA_State
 from bayesian_agents.rsaWorld import RSA_World
+from bayesian_agents.joint_rsa import RSA
 from utils.config import *
 from utils.image_and_text_utils import (
     char_to_index,
@@ -46,7 +47,8 @@ def likelihood(
         * (1 / self.images.shape[0])
     )
     self.image_priors[0] = img_prior
-    sentence = np.expand_dims(np.expand_dims(vectorize_caption(start_from)[0], 0), -1)
+    sentence = np.expand_dims(np.expand_dims(
+        vectorize_caption(start_from)[0], 0), -1)
     self.context_sentence = copy.deepcopy(sentence)
 
     likelihood = {}
@@ -92,13 +94,15 @@ def ana_greedy(
     """
 
     # this RSA passes along a state: see rsa_state
-    state = RSA_State(initial_world_prior, listener_rationality=listener_rationality)
+    state = RSA_State(initial_world_prior,
+                      listener_rationality=listener_rationality)
     # state.image_priors[:]=img_prior
 
     context_sentence = ["^"] + start_from
     state.context_sentence = context_sentence
 
-    world = RSA_World(target=target, rationality=speaker_rationality, speaker=speaker)
+    world = RSA_World(
+        target=target, rationality=speaker_rationality, speaker=speaker)
 
     probs = []
     for timestep in tqdm(range(len(start_from) + 1, max_sentence_length)):
@@ -125,8 +129,57 @@ def ana_greedy(
     return [("".join(state.context_sentence), summed_probs)]
 
 
+def ana_beam(rsa: RSA, initial_word_prior, depth=0, beam_width=10, target=0, cut_rate=1):
+    world = RSA_World(
+        target=target, rationality=0, speaker=0)
+
+    queue = []
+
+    initial_state = RSA_State(
+        initial_word_prior,
+        listener_rationality=1.0
+    )
+    initial_state.timestep = 0
+    final_sentences = []
+    initial_state.context_sentence = ["^"]
+
+    for i in range(beam_width):
+        queue.append((copy.deepcopy(initial_state), [], i))
+
+    itercount = 0
+    while queue:
+
+        if itercount % cut_rate == 0:
+            q = sorted(queue, key=lambda x: x[1], reverse=True)
+            queue = q[:beam_width]
+
+        state, probs, beam_num = queue.pop(0)
+        state.timestep += 1
+        s = rsa.speaker(state=state, world=world, depth=depth)
+        segment = np.flip(np.argsort(s))[:beam_width][beam_num]
+        probs.append(s[segment])
+        l = rsa.listener(state=state, utterance=segment, depth=depth)
+        state.world_priors[state.timestep] = l
+        state.context_sentence += [rsa.idx2seg[segment]]
+        rsa.flush_cache()
+        if rsa.idx2seg[segment] == stop_token[rsa.seg_type]:
+            final_sentences.append(
+                ("".join(state.context_sentence), np.sum(probs)))
+        elif state.timestep == max_sentence_length - 1:
+            final_sentences.append(
+                ("".join(state.context_sentence), np.sum(probs)))
+        else:
+            if i in range(beam_width):
+                queue.append((copy.deepcopy(state), copy.deepcopy(probs), i))
+
+        itercount += 1
+
+    return sorted(final_sentences, key=lambda x: x[1], reverse=True)
+
+
 # But within the n-th order ethno-metapragmatic perspective, this creative indexical effect is the motivated realization, or performable execution, of an already constituted framework of semiotic value.
-def ana_beam(
+
+def ana_beam_old(
     rsa,
     initial_world_prior,
     speaker_rationality,
@@ -162,15 +215,14 @@ def ana_beam(
     decay_rate: a multiplier that makes later decisions in the unrolling matter less: 0.0 does no decay. negative decay makes start matter more
     """
 
-    state = RSA_State(initial_world_prior, listener_rationality=listener_rationality)
+    state = RSA_State(initial_world_prior,
+                      listener_rationality=listener_rationality)
     # state.image_priors[:]=img_prior
 
-    context_sentence = start_from
-    state.context_sentence = context_sentence
+    world = RSA_World(
+        target=target, rationality=speaker_rationality, speaker=speaker)
 
-    world = RSA_World(target=target, rationality=speaker_rationality, speaker=speaker)
-
-    context_sentence = start_from
+    context_sentence = ["^"] + start_from
     state.context_sentence = context_sentence
 
     sent_worldprior_prob = [(state.context_sentence, state.world_priors, 0.0)]
@@ -216,7 +268,8 @@ def ana_beam(
 
                 # print("beam listener",rsa.word2ord[seg], l)
 
-                new_sent_worldprior_prob.append((new_sentence, worldpriors, new_prob))
+                new_sent_worldprior_prob.append(
+                    (new_sentence, worldpriors, new_prob))
 
         rsa.flush_cache()
         sent_worldprior_prob = sorted(
@@ -244,12 +297,17 @@ def ana_beam(
             if len(final_sentences) >= 50:
                 # 	# print("beam unroll time",tic-toc)
                 # 	# print(state.image_priors[:])
-                sentences = sorted(final_sentences, key=lambda x: x[-1], reverse=True)
+                sentences = sorted(
+                    final_sentences, key=lambda x: x[-1], reverse=True)
                 output = []
                 for i, (sent, prob) in enumerate(sentences):
                     output.append(("".join(sent), prob))
 
                 return output
+            elif state.timestep == max_sentence_length - 1:
+                for sent, worldprior, prob in sent_worldprior_prob:
+                    final_sentence = copy.deepcopy(sent)
+                    final_sentences.append((final_sentence, prob))
             # 		# print(sentences)
             # 		for i,(sent,prob) in enumerate(sentences):
 
