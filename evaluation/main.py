@@ -1,7 +1,6 @@
-from .build_test_sets import (build_ts1, build_ts2, download_vg_assets,
-                              load_vg_dataset)
 
 from .evaluate import evaluate_ts1, evaluate_ts2
+
 from bayesian_agents._joint_rsa import SpeakerType, SamplingStrategy
 import json
 from .build_test_sets.vg_types import TS1, TS2
