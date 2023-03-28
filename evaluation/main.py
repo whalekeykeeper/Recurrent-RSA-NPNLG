@@ -4,6 +4,7 @@ from .evaluate import evaluate_ts1, evaluate_ts2
 from bayesian_agents._joint_rsa import SpeakerType, SamplingStrategy
 import json
 from .build_test_sets.vg_types import TS1, TS2
+from pprint import pprint
 
 
 def evaluate():
@@ -21,8 +22,8 @@ def evaluate():
     with open(ts2_path, "r", encoding="utf-8") as f:
         ts2: TS2 = json.load(f)
 
-    print(
-        "Starting evalation with parameters:",
+    print("Starting evaluation with parameters:")
+    pprint(
         {
             "strategy": strategy,
             "speaker_type": speaker_type,
