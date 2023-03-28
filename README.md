@@ -20,5 +20,16 @@ You can choose to train with either MSCOCO or the VG dataset.
 
 ##  
 
-## Evaluating
-To run the evaluation, simply run `ev.py`.
+## Setting and running up evaluation
+
+Run the following command in the appropriate environment to generate the test sets for evaluation of the models:
+
+```bash
+python build_test_sets.py
+```
+
+After the test sets have been generated, the following command runs the actual evaluation script:
+
+```bash
+python evaluation.py
+```
