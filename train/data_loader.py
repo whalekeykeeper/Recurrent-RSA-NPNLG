@@ -12,7 +12,7 @@ import os
 
 class VG:
     """
-    To create a VG class object.
+    Class to parse a Visual Genome dataset JSON    
     """
     def __init__(self, vg_json: str, data_size=None, ts1_json=None, ts2_json=None):
         self.ids = []  # [  img_id + "_" + region_id  ]
@@ -173,8 +173,8 @@ class VG:
 
 class Coco:
     """
-        To create a COCO class object.
-        """
+    Class to parse a MSCOCO dataset JSON    
+    """
     def __init__(self, coco_json: str, data_size=None):
         self.ids = []
         self.captions = {}  # { id: annotation }
@@ -208,7 +208,7 @@ class Coco:
 
 class Vocabulary:
     """
-    To create a class object for vocabulary.
+    Load and preprocess a VG/MSCOCO dataset to char/word embeddings
     """
     def __init__(self, captions_json: str, level: str, data_size=None, dataset="coco"):
         if dataset not in ["coco", "vg"]:
@@ -348,6 +348,8 @@ class VGDataset(data.Dataset):
     def __len__(self):
         return len(self.vg)
 
+# Following functions are following this PyTorch tutorial: https://github.com/yunjey/pytorch-tutorial/blob/master/tutorials/03-advanced/image_captioning/data_loader.py
+# (we also suspect, the original paper used the same tutorial, as many similarities can be found)
 
 def collate_fn(data):
     """Creates mini-batch tensors from the list of tuples (image, caption).
