@@ -14,6 +14,20 @@ def evaluate_ts1(
     max_sentence_length: int = 60,
     max_sentences: int = 50,
 ):
+    """
+    Evaluate the model on TS1.
+
+    :param test_set: The test set to evaluate on.
+    :param strategy: The sampling strategy to use.
+    :param speaker_type: The type of speaker to use.
+    :param speaker_rationality: The rationality of the speaker.
+    :param n_beams: The number of beams to use.
+    :param cut_rate: The cut rate to use.
+    :param max_sentence_length: The maximum sentence length to use.
+    :param max_sentences: The maximum number of sentences to use.
+
+    :return: The accuracy of the model on TS1.
+    """
     correctly_predicted = 0
     total = 0
     for cluster in tqdm(test_set):

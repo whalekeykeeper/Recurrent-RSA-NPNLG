@@ -88,6 +88,15 @@ def get_object_bounding_region(image_id: int, object: ImageObject, regions: Regi
 
 
 def visualize_ts1_cluster(cluster: TS1_Raw_Cluster, regions: Regions, object_type: str = None, cluster_id: int = None):
+    """
+    Utility function to save visualizations of the objects and regions
+    of a cluster.
+
+    :param cluster: The cluster to visualize
+    :param regions: The regions of the Visual Genome dataset
+    :param object_type: The type of object in the cluster
+    :param cluster_id: The ID of the cluster
+    """
     for image_id, object in cluster:
         data_dir = os.path.join(os.getcwd(), "data", "vg",
                                 "object_region_visualizations", object_type, str(cluster_id))
@@ -105,14 +114,40 @@ def visualize_ts1_cluster(cluster: TS1_Raw_Cluster, regions: Regions, object_typ
 
 
 def object_satisifies_minimum_dimensions(object: ImageObject, min_dims: int = 100):
+    """
+    Utility function to check if an object in the Visual Genome dataset
+    satisfies a minimum dimension requirement.
+
+    :param object: The object to check
+    :param min_dims: The minimum dimension requirement
+
+    :return: True if the object satisfies the minimum dimension requirement, False otherwise
+    """
     return object["w"] > min_dims and object["h"] > min_dims
 
 
 def region_satisfies_minimum_dimensions(region: ImageRegion, min_dims: int = 100):
+    """
+    Utility function to check if a region in the Visual Genome dataset
+    satisfies a minimum dimension requirement.
+
+    :param region: The region to check
+    :param min_dims: The minimum dimension requirement
+
+    :return: True if the region satisfies the minimum dimension requirement, False otherwise
+    """
     return region["width"] > min_dims and region["height"] > min_dims
 
 
 def download_image(image_id: int, metadata: Metadata) -> str:
+    """
+    Utility function to download an image from the Visual Genome dataset.
+
+    :param image_id: The ID of the image to download
+    :param metadata: The metadata of the Visual Genome dataset
+
+    :return: The path to the downloaded image
+    """
     image_path = f"data/vg/images/{image_id}.jpg"
     image_url = next(
         filter(lambda x: x["image_id"] == image_id, metadata))["url"]
@@ -133,7 +168,17 @@ def download_image(image_id: int, metadata: Metadata) -> str:
 
 
 def process_ts1_cluster(cluster: TS1_Raw_Cluster, metadata: Metadata = None, object_type: str = "", cluster_id: int = 1) -> TS1_Item:
+    """
+    Process TS1 cluster from an intermediate representation to the final representation.
+    This includes downloading all images in the cluster, cropping out only the object.
 
+    :param cluster: The cluster to process
+    :param metadata: The metadata of the Visual Genome dataset
+    :param object_type: The type of object in the cluster
+    :param cluster_id: The ID of the cluster
+
+    :return: The processed cluster
+    """
     print(
         f"Processing TS1 cluster {cluster_id} for object type '{object_type}'")
 
@@ -179,7 +224,7 @@ def process_ts1_cluster(cluster: TS1_Raw_Cluster, metadata: Metadata = None, obj
 
 def visualize_image_region(image_id: int, region: ImageRegion, save_path: str = None):
     """
-    Visualize a region of an image in the Visual Genome dataset
+    Visualize a region of an image in the Visual Genome dataset.
     """
 
     image_path = f"data/vg/images/{image_id}.jpg"
@@ -213,7 +258,7 @@ def visualize_image_region(image_id: int, region: ImageRegion, save_path: str = 
 def avg_word_overlap(cluster: TS2_Raw_Cluster) -> float:
     """
     Compute average word overlap in a cluster of image 
-    regions of the VG dataset
+    regions of the VG dataset.
     """
     phrases = [x[1]["phrase"] for x in cluster]
     sets = [set(x.split()) for x in phrases]
@@ -224,6 +269,9 @@ def avg_word_overlap(cluster: TS2_Raw_Cluster) -> float:
 
 
 def visualize_ts2_cluster(cluster: TS2_Raw_Cluster, cluster_id: int = None):
+    """
+    Visualize a cluster of image regions of the VG dataset.
+    """
     for image_id, region in cluster:
         data_dir = os.path.join(os.getcwd(), "data", "vg",
                                 "region_visualizations", str(cluster_id))
@@ -239,7 +287,16 @@ def visualize_ts2_cluster(cluster: TS2_Raw_Cluster, cluster_id: int = None):
 
 
 def process_ts2_cluster(cluster: TS2_Raw_Cluster, metadata: Metadata = None, cluster_id: int = 1) -> TS2_Item:
+    """
+    Process TS2 cluster from an intermediate representation to the final representation.
+    This includes downloading all images in the cluster, cropping out only the region.
 
+    :param cluster: The cluster to process
+    :param metadata: The metadata of the Visual Genome dataset
+    :param cluster_id: The ID of the cluster
+
+    :return: The processed cluster
+    """
     print(
         f"Processing TS2 cluster {cluster_id}")
 

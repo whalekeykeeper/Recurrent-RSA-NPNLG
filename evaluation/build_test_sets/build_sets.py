@@ -14,6 +14,13 @@ from .vg_types import (TS1, TS2, ImageRegion, Metadata, Objects, Regions,
 def _get_object_clusters(object_type: str = "person", n_cluster_items: int = 10, n_clusters: int = 10, objects: Objects = None) -> TS1_Raw_Clusters:
     """
     Get a random sample of objects of the given type.
+
+    :param object_type: The type of object to sample.
+    :param n_cluster_items: The number of items in each cluster.
+    :param n_clusters: The number of clusters to sample.
+    :param objects: The objects from the Visual Genome dataset.
+
+    :return: A list of object clusters.
     """
 
     if not objects:
@@ -41,7 +48,15 @@ def _get_object_clusters(object_type: str = "person", n_cluster_items: int = 10,
 
 
 def build_ts1(objects: Objects = None, regions: Regions = None, metadata: Metadata = None) -> TS1:
+    """
+    Builder function for TS1.
 
+    :param objects: The objects from the Visual Genome dataset.
+    :param regions: The regions from the Visual Genome dataset.
+    :param metadata: The metadata from the Visual Genome dataset.
+
+    :return: Object representation of test set.
+    """
     test_set_path = "data/test_sets/ts1/ts1.json"
 
     if os.path.exists(test_set_path):
@@ -88,6 +103,15 @@ def build_ts1(objects: Objects = None, regions: Regions = None, metadata: Metada
 
 
 def _acceptable_next_cluster_item(cluster: TS2_Raw_Cluster, exhausted_ids: MutableSet[int]) -> Tuple[int, ImageRegion]:
+    """
+    Utility function for TS2 cluster building. Determines whether a given item
+    is acceptable to be added to a cluster.
+
+    :param cluster: The cluster to which the item would be added.
+    :param exhausted_ids: The set of region ids that have already been added to a cluster.
+
+    :return: A function that takes an item and returns whether it is acceptable.
+    """
     def inner(item: Tuple[int, ImageRegion]) -> bool:
         _, region = item
         if region["region_id"] in exhausted_ids:
@@ -99,7 +123,14 @@ def _acceptable_next_cluster_item(cluster: TS2_Raw_Cluster, exhausted_ids: Mutab
 
 def _get_region_clusters(regions: Regions = None, n_cluster_items: int = 10, n_clusters: int = 10) -> TS2_Raw_Clusters:
     """
-    Get a random sample of regions.
+    Get a random sample of regions from VG. More clusters are initialized than
+    necessary, and only the n_clusters best clusters are returned.
+
+    :param regions: The regions from the Visual Genome dataset.
+    :param n_cluster_items: The number of items in each cluster.
+    :param n_clusters: The number of clusters to sample.
+
+    :return: A list of region clusters.
     """
 
     flattened_regions: List[Tuple[int, ImageRegion]] = []
@@ -140,6 +171,14 @@ def _get_region_clusters(regions: Regions = None, n_cluster_items: int = 10, n_c
 
 
 def build_ts2(regions: Regions = None, metadata: Metadata = None) -> TS2:
+    """
+    Builder function for TS2.
+
+    :param regions: The regions from the Visual Genome dataset.
+    :param metadata: The metadata from the Visual Genome dataset.
+
+    :return: Object representation of test set.
+    """
     test_set_path = "data/test_sets/ts2/ts2.json"
 
     if os.path.exists(test_set_path):

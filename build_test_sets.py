@@ -1,3 +1,7 @@
+"""
+Entrypoint for test set generation.
+"""
+
 
 from evaluation.build_test_sets import (build_ts1, build_ts2,
                                         download_vg_assets, load_vg_dataset)

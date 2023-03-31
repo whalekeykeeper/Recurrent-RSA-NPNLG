@@ -8,6 +8,12 @@ from typing import Dict, List
 
 
 def _download_asset(url: str, outpath: str):
+    """
+    Download file at url to outpath.
+
+    :param url: URL to download from
+    :param outpath: Path to download to
+    """
     final_zip_path = outpath + ".zip"
     final_path = outpath + ".json"
 
@@ -31,6 +37,9 @@ def _download_asset(url: str, outpath: str):
 
 
 def download_vg_assets():
+    """
+    Utility function to download Visual Genome Data.
+    """
     objects_url = "http://visualgenome.org/static/data/dataset/image_data_v1.json.zip"
     regions_url = "http://visualgenome.org/static/data/dataset/region_descriptions_v1.json.zip"
     metadata_url = "http://visualgenome.org/static/data/dataset/image_data.json.zip"
